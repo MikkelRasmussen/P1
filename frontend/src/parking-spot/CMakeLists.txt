@@ -1,0 +1,1 @@
+add_library(parking-spot parking-spot.c)
