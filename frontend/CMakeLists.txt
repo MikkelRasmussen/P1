@@ -14,6 +14,7 @@ add_subdirectory(src/parking-lot)
 add_subdirectory(src/car)
 add_subdirectory(src/save-load)
 add_subdirectory(src/export)
+add_subdirectory(src/camera)
 
 
 enable_testing()
