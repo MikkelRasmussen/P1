@@ -24,8 +24,12 @@ void update_mouse_drag(Camera2D *camera) {
 }
 
 void draw_centered_text(char *text, int x, int y, int font_size) {
-  Vector2 text_size = MeasureTextEx(GetFontDefault(), text, font_size, 0);
-  DrawText(text, -text_size.x * .5, -text_size.y * .5, font_size, LIGHTGRAY);
+  float spacing = 2.0f;
+  Vector2 text_size = MeasureTextEx(GetFontDefault(), text, font_size, spacing);
+  int centered_x = x - (int)(text_size.x * 0.5f);
+  int centered_y = y - (int)(text_size.y * 0.5f);
+  DrawTextEx(GetFontDefault(), text, (Vector2){centered_x, centered_y},
+             font_size, spacing, LIGHTGRAY);
 }
 
 void set_window_icon() {

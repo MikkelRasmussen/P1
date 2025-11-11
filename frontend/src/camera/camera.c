@@ -1,16 +1,12 @@
-#include "../utils/utils.h"
 #include "raylib.h"
 #include "raymath.h"
 
-void update_camera_offset(Camera2D *camera, int *width, int *height) {
-  Vector2 offset = (Vector2){camera->offset.x - *width * .5,
-                             camera->offset.y - *height * .5};
+void update_camera_offset(Camera2D *camera, int old_width, int old_height,
+                          int width, int height) {
+  Vector2 offset = (Vector2){camera->offset.x - old_width * .5,
+                             camera->offset.y - old_height * .5};
 
-  int did_screen_size_change = get_screen_size_change(width, height);
-  if (!did_screen_size_change)
-    return;
-
-  camera->offset = (Vector2){*width * .5 + offset.x, *height * .5 + offset.y};
+  camera->offset = (Vector2){width * .5 + offset.x, height * .5 + offset.y};
 }
 
 void update_camera_zoom(Camera2D *camera) {
