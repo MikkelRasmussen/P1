@@ -17,8 +17,8 @@ int main(void) {
   set_window_icon();
   SetTargetFPS(60);
 
-  int render_width = screen_width * VIEW_PORT_DEC_SIZE;
-  int render_height = screen_height - TOOL_BAR_HEIGHT;
+  int render_width = DEFAULT_SCREEN_WIDTH - INSPECTOR_WIDTH;
+  int render_height = DEFAULT_SCREEN_HEIGHT - TOOL_BAR_HEIGHT;
   RenderTexture camera_texture = LoadRenderTexture(render_width, render_height);
   Camera2D camera = init_camera(render_width, render_height);
   Rectangle camera_rect = {0.0f, 0.0f, (float)render_width,

@@ -7,16 +7,16 @@ void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
                                Rectangle *camera_rect, int *screen_width,
                                int *screen_height, int *render_width,
                                int *render_height) {
-  double w_pct = *render_width / (float)*screen_width;
-  double h_pct = *render_height / (float)*screen_height;
+  // double w_pct = *render_width / (float)*screen_width;
+  // double h_pct = *render_height / (float)*screen_height;
   int did_screen_size_change =
       get_screen_size_change(screen_width, screen_height);
 
   if (did_screen_size_change) {
     int old_render_width = *render_width;
     int old_render_height = *render_height;
-    *render_width = *screen_width * w_pct;
-    *render_height = *screen_height * h_pct;
+    *render_width = *screen_width - INSPECTOR_WIDTH;
+    *render_height = *screen_height - TOOL_BAR_HEIGHT;
 
     UnloadRenderTexture(*camera_texture);
 
