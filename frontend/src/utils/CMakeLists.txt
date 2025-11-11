@@ -1,2 +1,2 @@
-add_library(utils utils.c)
+add_library(utils STATIC utils.c utils.h)
 target_link_libraries(utils PRIVATE raylib)

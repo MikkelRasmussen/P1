@@ -4,14 +4,15 @@
 int main(void) {
   int screen_width = 1280;
   int screen_height = 720;
-  Camera2D camera = {0};
-  camera.offset = (Vector2){screen_width / 2.0f, screen_height / 2.0f};
-  camera.rotation = 0.0f;
-  camera.zoom = 1.0f;
+  Camera2D camera = {.offset = {screen_width / 2.0f, screen_height / 2.0f},
+                     .target = {0, 0},
+                     .rotation = 0.0f,
+                     .zoom = 1.0f};
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(screen_width, screen_height, "Parking Manager");
 
+  set_window_icon();
   SetTargetFPS(60);
 
   // Main game loop

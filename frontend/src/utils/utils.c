@@ -44,8 +44,6 @@ void update_mouse_drag(Camera2D *camera) {
     return;
 
   Vector2 delta = GetMouseDelta();
-  // delta.x /= camera->zoom;
-  // delta.y /= camera->zoom;
   Vector2 offset = camera->offset;
   camera->offset = (Vector2){offset.x + delta.x, offset.y + delta.y};
 }
@@ -53,4 +51,10 @@ void update_mouse_drag(Camera2D *camera) {
 void draw_centered_text(char *text, int x, int y, int font_size) {
   Vector2 text_size = MeasureTextEx(GetFontDefault(), text, font_size, 0);
   DrawText(text, -text_size.x * .5, -text_size.y * .5, font_size, LIGHTGRAY);
+}
+
+void set_window_icon() {
+  Image icon = LoadImage("../icon.png");
+  SetWindowIcon(icon);
+  UnloadImage(icon);
 }
