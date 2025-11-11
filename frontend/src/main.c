@@ -17,6 +17,7 @@ int main(void) {
   // Main game loop
   while (!WindowShouldClose()) {
     // Update
+    update_camera_zoom(&camera);
     update_camera_offset(&camera, &screen_width, &screen_height);
     update_mouse_drag(&camera);
 
