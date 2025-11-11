@@ -1,0 +1,8 @@
+#define VIEW_PORT_DEC_SIZE 0.75
+#define TOOL_BAR_HEIGHT 56
+#define DEFAULT_SCREEN_WIDTH 1280
+#define DEFAULT_SCREEN_HEIGHT 720
+#define NEW_ICON "#8#"
+#define OPEN_ICON "#1#"
+#define SAVE_ICON "#2#"
+#define EXPORT_ICON "#7#"

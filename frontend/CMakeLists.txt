@@ -5,6 +5,7 @@ set(CMAKE_C_STANDARD 11)
 set(CMAKE_BUILD_TYPE Debug)
 
 configure_file(${CMAKE_SOURCE_DIR}/icon.png ${CMAKE_BINARY_DIR}/icon.png COPYONLY)
+configure_file(${CMAKE_SOURCE_DIR}/style.rgs ${CMAKE_BINARY_DIR}/style.rgs COPYONLY)
 
 find_package(raylib CONFIG REQUIRED)
 add_subdirectory(src)

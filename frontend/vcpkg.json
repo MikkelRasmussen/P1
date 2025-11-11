@@ -1,5 +1,5 @@
 {
 	"name": "parking-manager-frontend",
 	"version-string": "0.1.0",
-	"dependencies": ["raylib"]
+	"dependencies": ["raylib", "raygui"]
 }

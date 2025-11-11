@@ -1,6 +1,25 @@
 #pragma once
 #include "raylib.h"
 
-void update_camera_offset(Camera2D *camera, int old_width, int old_height,
-                          int width, int height);
-void update_camera_zoom(Camera2D *camera);
+Camera2D init_camera(int render_width, int render_height);
+
+/**
+ * Updates the camera drag and zoom logic
+ */
+void update_camera(Camera2D *camera, int render_x, int render_y,
+                   int render_width, int render_height);
+
+/**
+ * Updates the camera offset when resizing the window
+ */
+void update_camera_offset(Camera2D *camera, int old_render_width,
+                          int old_render_height, int render_width,
+                          int render_height);
+
+/**
+ * Updates the camera zoom when scrolling on mouse wheel
+ */
+void update_camera_zoom(Camera2D *camera, int render_x, int render_y,
+                        int render_width, int render_height);
+
+void update_camera_drag(Camera2D *camera);
