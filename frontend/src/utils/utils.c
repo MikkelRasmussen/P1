@@ -106,11 +106,12 @@ void draw_tab_bar(int width) {
 }
 
 void draw_tool_bar(int *tool_index, int render_width, int screen_height) {
-  GuiToggleGroup((Rectangle){.x = (float)render_width / 2 - 1.5f * BUTTON_SIZE,
+  GuiToggleGroup((Rectangle){.x = (float)render_width / 2 - 2 * BUTTON_SIZE -
+                                  1.5f * BUTTON_SPACING,
                              .y = screen_height - BUTTON_SIZE,
                              .width = BUTTON_SIZE,
                              .height = BUTTON_SIZE},
-                 "#220#;#221#;#222#", tool_index);
+                 "#21#;#220#;#221#;#222#", tool_index);
 }
 
 void draw_inspector(int render_width, int screen_width, int screen_height) {
