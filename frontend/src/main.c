@@ -12,11 +12,13 @@ int main(void) {
   int screen_height = DEFAULT_SCREEN_HEIGHT;
   ParkingLot lot =
       (ParkingLot){.parking_spots = 0, .floors = 2, .zones = {'A', 'B'}};
+  int tool_index = 0;
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(screen_width, screen_height, "Parking Manager");
 
   GuiLoadStyle("../style.rgs");
+  GuiLoadIcons("../icons.rgi", false);
   set_window_icon();
   SetTargetFPS(60);
 
@@ -54,11 +56,9 @@ int main(void) {
     DrawTextureRec(camera_texture.texture, camera_rect,
                    (Vector2){0, TOOL_BAR_HEIGHT}, WHITE);
     draw_floor_buttons(&lot.floors, screen_height);
-    draw_tool_bar(screen_width);
-    GuiPanel((Rectangle){render_width, TOOL_BAR_HEIGHT,
-                         screen_width - render_width,
-                         screen_height - TOOL_BAR_HEIGHT},
-             "Inspector");
+    draw_tab_bar(screen_width);
+    draw_tool_bar(&tool_index, render_width, screen_height);
+    draw_inspector(render_width, screen_width, screen_height);
 
     EndDrawing();
   }

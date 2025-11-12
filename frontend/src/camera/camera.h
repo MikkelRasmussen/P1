@@ -9,6 +9,9 @@ Camera2D init_camera(int render_width, int render_height);
 void update_camera(Camera2D *camera, int render_x, int render_y,
                    int render_width, int render_height);
 
+int get_is_outside_renderer(int render_x, int render_y, int render_width,
+                            int render_height);
+
 /**
  * Updates the camera offset when resizing the window
  */
@@ -19,7 +22,6 @@ void update_camera_offset(Camera2D *camera, int old_render_width,
 /**
  * Updates the camera zoom when scrolling on mouse wheel
  */
-void update_camera_zoom(Camera2D *camera, int render_x, int render_y,
-                        int render_width, int render_height);
+void update_camera_zoom(Camera2D *camera, int render_x, int render_y);
 
 void update_camera_drag(Camera2D *camera);

@@ -3,6 +3,7 @@
 #include "../definitions.h"
 #include "rlgl.h"
 #include <raylib.h>
+#include <string.h>
 
 void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
                                Rectangle *camera_rect, int *screen_width,
@@ -60,16 +61,13 @@ void draw_grid() {
   rlPushMatrix();
   rlTranslatef(0, 25 * 250, 0);
   rlRotatef(90, 1, 0, 0);
-  Color border_color = get_border_color();
-  rlColor4ub(border_color.r, border_color.g, border_color.b, border_color.a);
   DrawGrid(500, 50);
   rlPopMatrix();
 }
 
-void draw_tool_bar(int width) {
+void draw_tab_bar(int width) {
   DrawRectangle(0, 0, width, TOOL_BAR_HEIGHT, get_bg_color());
-  DrawLineEx((Vector2){0, TOOL_BAR_HEIGHT}, (Vector2){width, TOOL_BAR_HEIGHT},
-             1, get_line_color());
+  GuiLine((Rectangle){0, TOOL_BAR_HEIGHT, width, 1}, NULL);
 
   GuiEnableTooltip();
   // New
@@ -107,21 +105,37 @@ void draw_tool_bar(int width) {
   GuiDisableTooltip();
 }
 
+void draw_tool_bar(int *tool_index, int render_width, int screen_height) {
+  GuiToggleGroup((Rectangle){.x = (float)render_width / 2 - 1.5f * BUTTON_SIZE,
+                             .y = screen_height - BUTTON_SIZE,
+                             .width = BUTTON_SIZE,
+                             .height = BUTTON_SIZE},
+                 "#220#;#221#;#222#", tool_index);
+}
+
+void draw_inspector(int render_width, int screen_width, int screen_height) {
+  GuiPanel((Rectangle){render_width, TOOL_BAR_HEIGHT,
+                       screen_width - render_width,
+                       screen_height - TOOL_BAR_HEIGHT},
+           "Inspector");
+}
+
 void draw_floor_buttons(int *floors, int screen_height) {
   // Calculate the button container total height and the y-coord of the
   // container
-  int total_height = (*floors + 1) * (BUTTON_SIZE);
+  int total_height = (*floors + 1) * (BUTTON_SIZE) + BUTTON_SPACING * *floors;
   int base_y =
       ((screen_height - TOOL_BAR_HEIGHT) - total_height) / 2 + TOOL_BAR_HEIGHT;
 
   // Draw floor buttons
   for (int i = 0; i < *floors; i++) {
-    int y = base_y + BUTTON_SIZE * i;
-    GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE}, TextFormat("%d", i));
+    int y = base_y + (BUTTON_SIZE + BUTTON_SPACING) * i;
+    GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE},
+              TextFormat("%d", i + 1));
   }
 
   // Draw add floor button
-  int y = base_y + BUTTON_SIZE * *floors;
+  int y = base_y + (BUTTON_SIZE + BUTTON_SPACING) * *floors;
   int add_floor = GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE}, "+");
 
   // Add floor, if button was pressed
