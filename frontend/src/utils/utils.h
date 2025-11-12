@@ -21,5 +21,5 @@ void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
 int get_screen_size_change(int *width, int *height);
 void draw_centered_text(char *text, int x, int y, int font_size);
 void draw_tool_bar(int width);
-void draw_floor_buttons(int floors, int screen_height);
+void draw_floor_buttons(int *floors, int screen_height);
 void draw_grid();

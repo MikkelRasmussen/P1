@@ -4,5 +4,5 @@
 typedef struct {
   ParkingSpot *parking_spots;
   int floors;
-  char zones;
+  char zones[26];
 } ParkingLot;

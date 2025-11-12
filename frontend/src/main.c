@@ -1,5 +1,6 @@
 #include "camera/camera.h"
 #include "definitions.h"
+#include "parking-lot/parking-lot.h"
 #include "raylib.h"
 #include "utils/utils.h"
 
@@ -9,6 +10,8 @@
 int main(void) {
   int screen_width = DEFAULT_SCREEN_WIDTH;
   int screen_height = DEFAULT_SCREEN_HEIGHT;
+  ParkingLot lot =
+      (ParkingLot){.parking_spots = 0, .floors = 2, .zones = {'A', 'B'}};
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(screen_width, screen_height, "Parking Manager");
@@ -50,12 +53,12 @@ int main(void) {
     // Draw Camera Texture
     DrawTextureRec(camera_texture.texture, camera_rect,
                    (Vector2){0, TOOL_BAR_HEIGHT}, WHITE);
+    draw_floor_buttons(&lot.floors, screen_height);
     draw_tool_bar(screen_width);
     GuiPanel((Rectangle){render_width, TOOL_BAR_HEIGHT,
                          screen_width - render_width,
                          screen_height - TOOL_BAR_HEIGHT},
              "Inspector");
-    draw_floor_buttons(2, screen_height);
 
     EndDrawing();
   }

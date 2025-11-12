@@ -8,8 +8,6 @@ void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
                                Rectangle *camera_rect, int *screen_width,
                                int *screen_height, int *render_width,
                                int *render_height) {
-  // double w_pct = *render_width / (float)*screen_width;
-  // double h_pct = *render_height / (float)*screen_height;
   int did_screen_size_change =
       get_screen_size_change(screen_width, screen_height);
 
@@ -69,10 +67,7 @@ void draw_grid() {
 }
 
 void draw_tool_bar(int width) {
-#define BUTTON_SPACING 8
-#define BUTTON_SIZE TOOL_BAR_HEIGHT - 24
-#define TOOL_BAR_PADDING 12
-
+  DrawRectangle(0, 0, width, TOOL_BAR_HEIGHT, get_bg_color());
   DrawLineEx((Vector2){0, TOOL_BAR_HEIGHT}, (Vector2){width, TOOL_BAR_HEIGHT},
              1, get_line_color());
 
@@ -112,16 +107,24 @@ void draw_tool_bar(int width) {
   GuiDisableTooltip();
 }
 
-void draw_floor_buttons(int floors, int screen_height) {
-  int button_count = floors + 1;
-  int total_height = button_count * (BUTTON_SIZE);
-  int base_y = (screen_height - total_height) / 2 + TOOL_BAR_HEIGHT;
+void draw_floor_buttons(int *floors, int screen_height) {
+  // Calculate the button container total height and the y-coord of the
+  // container
+  int total_height = (*floors + 1) * (BUTTON_SIZE);
+  int base_y =
+      ((screen_height - TOOL_BAR_HEIGHT) - total_height) / 2 + TOOL_BAR_HEIGHT;
 
-  for (int i = 0; i < floors; i++) {
+  // Draw floor buttons
+  for (int i = 0; i < *floors; i++) {
     int y = base_y + BUTTON_SIZE * i;
     GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE}, TextFormat("%d", i));
   }
 
-  int y = base_y + BUTTON_SIZE * floors; // Changed from button_count to floors
-  GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE}, "+");
+  // Draw add floor button
+  int y = base_y + BUTTON_SIZE * *floors;
+  int add_floor = GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE}, "+");
+
+  // Add floor, if button was pressed
+  if (add_floor)
+    (*floors)++;
 }
