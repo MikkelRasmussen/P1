@@ -55,6 +55,7 @@ int main(void) {
                          screen_width - render_width,
                          screen_height - TOOL_BAR_HEIGHT},
              "Inspector");
+    draw_floor_buttons(2, screen_height);
 
     EndDrawing();
   }

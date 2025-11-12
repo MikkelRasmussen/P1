@@ -1,5 +1,5 @@
 {
-	"cmake.generator": "MinGW Makefiles",
+	"cmake.generator": "Ninja",
 	"cmake.buildDirectory": "${workspaceFolder}/build",
 	"cmake.configureSettings": {
 		"CMAKE_TOOLCHAIN_FILE": "${env:VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"

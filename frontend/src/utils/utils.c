@@ -2,6 +2,7 @@
 #include "../camera/camera.h"
 #include "../definitions.h"
 #include "rlgl.h"
+#include <raylib.h>
 
 void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
                                Rectangle *camera_rect, int *screen_width,
@@ -109,4 +110,18 @@ void draw_tool_bar(int width) {
                   .height = BUTTON_SIZE},
       EXPORT_ICON);
   GuiDisableTooltip();
+}
+
+void draw_floor_buttons(int floors, int screen_height) {
+  int button_count = floors + 1;
+  int total_height = button_count * (BUTTON_SIZE);
+  int base_y = (screen_height - total_height) / 2 + TOOL_BAR_HEIGHT;
+
+  for (int i = 0; i < floors; i++) {
+    int y = base_y + BUTTON_SIZE * i;
+    GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE}, TextFormat("%d", i));
+  }
+
+  int y = base_y + BUTTON_SIZE * floors; // Changed from button_count to floors
+  GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE}, "+");
 }
