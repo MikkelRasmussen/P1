@@ -6,6 +6,7 @@
 	},
 	"cmake.sourceDirectory": "${workspaceFolder}",
 	"files.associations": {
+		"*.embeddedhtml": "html",
 		"*.ejs": "html",
 		"iostream": "c",
 		"xstring": "c",
@@ -68,7 +69,8 @@
 		"iomanip": "c",
 		"optional": "c",
 		"ratio": "c",
-		"sstream": "c"
+		"sstream": "c",
+		"definitions.h": "c"
 	},
 	"cSpell.words": [
 		"nfdopendialogu",

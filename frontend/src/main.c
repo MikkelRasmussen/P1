@@ -34,6 +34,12 @@ int main(void) {
     update_screen_size_change(&camera, &camera_texture, &camera_rect,
                               &render_width, &render_height);
     update_camera(&camera, 0, TOOL_BAR_HEIGHT, render_width, render_height);
+   
+    if (tool_index == TOOL_INSPECT && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+    Vector2 delta = GetMouseDelta();
+    camera.offset.x += delta.x;
+    camera.offset.y += delta.y;
+}
 
     // Draw to Camera Render Texture
     BeginTextureMode(camera_texture);

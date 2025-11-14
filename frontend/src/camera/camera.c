@@ -1,6 +1,7 @@
 #include "camera.h"
 #include "raymath.h"
 
+
 Camera2D init_camera(int render_width, int render_height) {
   return (Camera2D){.offset = {render_width / 2.0f, render_height / 2.0f},
                     .target = {0, 0},
@@ -10,14 +11,13 @@ Camera2D init_camera(int render_width, int render_height) {
 
 void update_camera(Camera2D *camera, int render_x, int render_y,
                    int render_width, int render_height) {
-  int is_outside_renderer =
-      get_is_outside_renderer(render_x, render_y, render_width, render_height);
-  if (is_outside_renderer)
-    return;
+    if (get_is_outside_renderer(render_x, render_y, render_width, render_height))
+        return;
 
-  update_camera_zoom(camera, render_x, render_y);
-  update_camera_drag(camera);
+    update_camera_zoom(camera, render_x, render_y);
+    update_camera_drag(camera);
 }
+
 
 int get_is_outside_renderer(int render_x, int render_y, int render_width,
                             int render_height) {
@@ -56,11 +56,13 @@ void update_camera_zoom(Camera2D *camera, int render_x, int render_y) {
 }
 
 void update_camera_drag(Camera2D *camera) {
-  int is_middle_mouse_down = IsMouseButtonDown(MOUSE_BUTTON_MIDDLE);
-  if (!is_middle_mouse_down)
-    return;
+    // Only middle mouse drags the camera
+    if (!IsMouseButtonDown(MOUSE_BUTTON_MIDDLE))
+        return;
 
-  Vector2 delta = GetMouseDelta();
-  Vector2 offset = camera->offset;
-  camera->offset = (Vector2){offset.x + delta.x, offset.y + delta.y};
+    Vector2 delta = GetMouseDelta();
+    camera->offset.x += delta.x;
+    camera->offset.y += delta.y;
 }
+
+
