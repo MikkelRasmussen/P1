@@ -1,6 +1,7 @@
 #include "utils.h"
 #include "../camera/camera.h"
 #include "../definitions.h"
+#include "../parking-spot/parking-spot.h"
 #include "../project/project.h"
 #include "rlgl.h"
 #include <math.h>
@@ -8,7 +9,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-
 
 void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
                                Rectangle *camera_rect, int *render_width,
@@ -62,7 +62,7 @@ void draw_tab_bar(Project **project) {
   GuiEnableTooltip();
   // New
   GuiSetTooltip("New Project");
-  bool is_new_project_pressed = GuiButton(
+  bool is_new_pressed = GuiButton(
       (Rectangle){.x = TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 0,
                   .y = TOOL_BAR_PADDING,
                   .width = BUTTON_SIZE,
@@ -70,7 +70,7 @@ void draw_tab_bar(Project **project) {
       NEW_ICON);
   // Open
   GuiSetTooltip("Open Project");
-  bool is_open_project_pressed = GuiButton(
+  bool is_open_pressed = GuiButton(
       (Rectangle){.x = TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 1,
                   .y = TOOL_BAR_PADDING,
                   .width = BUTTON_SIZE,
@@ -78,7 +78,7 @@ void draw_tab_bar(Project **project) {
       OPEN_ICON);
   // Save
   GuiSetTooltip("Save Project");
-  GuiButton(
+  bool is_save_pressed = GuiButton(
       (Rectangle){.x = TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 2,
                   .y = TOOL_BAR_PADDING,
                   .width = BUTTON_SIZE,
@@ -86,7 +86,7 @@ void draw_tab_bar(Project **project) {
       SAVE_ICON);
   // Export
   GuiSetTooltip("Export Project");
-  GuiButton(
+  bool is_export_pressed = GuiButton(
       (Rectangle){.x = TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 3,
                   .y = TOOL_BAR_PADDING,
                   .width = BUTTON_SIZE,
@@ -94,11 +94,17 @@ void draw_tab_bar(Project **project) {
       EXPORT_ICON);
   GuiDisableTooltip();
 
-  if (is_new_project_pressed)
+  if (is_new_pressed)
     new_project(project);
 
-  if (is_open_project_pressed)
+  if (is_open_pressed)
     open_project(project);
+
+  if (is_save_pressed)
+    save_project(*project);
+
+  if (is_export_pressed)
+    export_project(*project);
 }
 
 void draw_tool_bar(int *tool_index, int render_width) {
@@ -119,17 +125,38 @@ void draw_inspector(int render_width) {
            "Inspector");
 }
 
-void handle_inspect_tool(Camera2D *camera, int render_x, int render_y, int tool_index) {
-    if (tool_index != TOOL_INSPECT) return;
+void handle_inspect_tool(Camera2D *camera, int render_x, int render_y,
+                         int tool_index) {
+  if (tool_index != TOOL_INSPECT)
+    return;
 
-    // Dragging the camera
-    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        Vector2 delta = GetMouseDelta();
-        camera->offset.x += delta.x;
-        camera->offset.y += delta.y;
-    }
+  // Dragging the camera
+  if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+    Vector2 delta = GetMouseDelta();
+    camera->offset.x += delta.x;
+    camera->offset.y += delta.y;
+  }
 }
 
+void handle_parking_tool(Project *project, const Camera2D *camera,
+                         int tool_index) {
+  if (tool_index == TOOL_PARKING && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    Vector2 mouse_pos = GetMousePosition();
+    Vector2 world_pos = GetScreenToWorld2D(mouse_pos, *camera);
+
+    // Snap to grid
+    world_pos.x = roundf(world_pos.x / GRID_SIZE) * GRID_SIZE;
+    world_pos.y = roundf(world_pos.y / GRID_SIZE) * GRID_SIZE;
+
+    // Define parking spot size
+    float spot_width = GRID_SIZE;
+    float spot_height = GRID_SIZE * 1.5f;
+
+    // Assign first zone by default
+    add_parking_spot(project, world_pos, spot_width, spot_height,
+                     project->zones[0]);
+  }
+}
 
 int deleting_floor_index = -1;
 void draw_floor_buttons(Project *project) {

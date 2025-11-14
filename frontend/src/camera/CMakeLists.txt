@@ -1,2 +1,6 @@
 add_library(camera camera.c)
-target_link_libraries(camera PRIVATE raylib)
+target_link_libraries(
+  camera
+  PRIVATE
+  raylib
+)
