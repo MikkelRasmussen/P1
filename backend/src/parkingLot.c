@@ -7,77 +7,36 @@
 #include <string.h>
 #include "parkingLot.h"
 
-#define MAX_LINE 256
 
-int lengthOfDataFile() {
-    //Åben filen data.csv og gem den
-    FILE *file = fopen("data.csv", "r");
-    //Print hvis der sker en fejl under indlæsningen af filen.
-    if (file == NULL) {
-        printf("Could not open file data.csv");
-        return 1;
-    }
-    int current_line = 1;
-    char c;
-    do
-    {
-        //Læs den næste character fra filen
-        c = fgetc(file);
-        // Hvis det er \n er der der en ny linje i filen.
-        if (c == '\n') current_line++;
-        // Forsæt indtil vi rammer enden af filen
-    } while (c != EOF);
+//Opretter en liste af parkeringspladser udfra ønsket antal og struct.
+void createParkingLot(int size, struct parking_lot parkinglots[]) {
+    for (int i = 0; i < size-1; i++){
+        scanDataFile(i+1, &parkinglots[i].floor, parkinglots[i].area,&parkinglots[i].number);
+        parkinglots[i].status = VACANT;    // Initially vacant
+        parkinglots[i].type = STANDARD;    // Skal ændres når der bliver lagt typer i datafilenx
 
-    // Lukker filen igen
-    fclose(file);
-
-    // Returnere længden af filen
-    return current_line;
+        printf("Lot %d | Floor: %d | Area: %s | Number: %d | Type: %s | Status: %s\n",
+                       i,
+                       parkinglots[i].floor,
+                       parkinglots[i].area,
+                       parkinglots[i].number,
+                       typeToString(parkinglots[i].type),
+                       statusToString(parkinglots[i].status));    }
 }
 
-int scanDataFile(int id, char *area) {
-    FILE *file = fopen("data.csv", "r");
-    if (file == NULL) {
-        printf("Could not open data.csv\n");
-        return 1;
+const char* statusToString(enum status s) {
+    switch (s) {
+        case VACANT: return "VACANT";
+        case OCCUPIED: return "OCCUPIED";
+        default: return "UNKNOWN";
     }
-    char line[MAX_LINE];
-    int found = 0;
-
-    // Skip the header line
-    fgets(line, sizeof(line), file);
-
-    while (fgets(line, sizeof(line), file)) {
-        char lineCopy[MAX_LINE];
-        strcpy(lineCopy, line);
-
-        char *parkingID = strtok(lineCopy, ",");
-        int compareID = atoi(parkingID);
-
-        if (id == compareID){
-            char *temp1 = strtok(NULL, ",");
-            char *temp2 = strtok(NULL, ",");
-            char *temp3 = strtok(NULL, ",");
-
-            if (temp1 && temp2 && temp3) {
-                int m1 = atoi(temp1);
-                int m2 = atoi(temp3);
-                printf("\n%s's INFO - Floor: %d Area: %s, Number: %d \n", parkingID, m1, temp2,m2);
-
-                found = 1;
-                break;
-            }
-        }
-    }
-
-    if (!found) {
-        printf("No record found for %d\n", id);
-    }
-
-    fclose(file);
-    return 0;
 }
 
-void createParkingLot(int id) {
-
+const char* typeToString(enum type t) {
+    switch (t) {
+        case HANDICAPPED: return "HANDICAPPED";
+        case EV: return "EV";
+        case STANDARD: return "STANDARD";
+        default: return "UNKNOWN";
+    }
 }
