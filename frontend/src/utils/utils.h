@@ -3,6 +3,11 @@
 #include "raygui.h"
 #include <stdbool.h>
 
+#define TOOL_INSPECT 0
+#define TOOL_PARKING 1
+#define TOOL_ROAD 2
+#define TOOL_ENTRANCE 3
+
 static inline Color get_bg_color(void) {
   return GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR));
 }

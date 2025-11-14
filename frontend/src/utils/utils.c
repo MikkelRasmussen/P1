@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 
+
 void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
                                Rectangle *camera_rect, int *render_width,
                                int *render_height) {
@@ -111,6 +112,18 @@ void draw_inspector(int render_width) {
                        SCREEN_HEIGHT - TOOL_BAR_HEIGHT},
            "Inspector");
 }
+
+void handle_inspect_tool(Camera2D *camera, int render_x, int render_y, int tool_index) {
+    if (tool_index != TOOL_INSPECT) return;
+
+    // Dragging the camera
+    if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+        Vector2 delta = GetMouseDelta();
+        camera->offset.x += delta.x;
+        camera->offset.y += delta.y;
+    }
+}
+
 
 int deleting_floor_index = -1;
 void draw_floor_buttons(Project *project) {
