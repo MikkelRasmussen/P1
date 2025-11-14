@@ -1,20 +1,18 @@
 #include "camera/camera.h"
 #include "definitions.h"
-#include "project/project.h"
 #include "raylib.h"
 #include "utils/utils.h"
-#include <string.h>
+#include <nfd.h>
+#include <stdlib.h>
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 int main(void) {
-  Project project = (Project){.parking_spots = NULL,
-                              .floors = 1,
-                              .active_floor = 0,
-                              .zones = {'A', 'B'}};
+  Project *project = NULL;
   int tool_index = 0;
 
+  NFD_Init();
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
   InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "Parking Manager");
   SetTargetFPS(60);
@@ -55,8 +53,8 @@ int main(void) {
     // Draw Camera Texture
     DrawTextureRec(camera_texture.texture, camera_rect,
                    (Vector2){0, TOOL_BAR_HEIGHT}, WHITE);
-    draw_floor_buttons(&project);
-    draw_tab_bar();
+    draw_floor_buttons(project);
+    draw_tab_bar(&project);
     draw_tool_bar(&tool_index, render_width);
     draw_inspector(render_width);
 
@@ -67,6 +65,8 @@ int main(void) {
 
   // De-Initialization
   CloseWindow(); // Close window and OpenGL context
+
+  free(project);
 
   return 0;
 }

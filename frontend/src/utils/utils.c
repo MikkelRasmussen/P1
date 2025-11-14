@@ -54,14 +54,14 @@ void draw_grid() {
   rlPopMatrix();
 }
 
-void draw_tab_bar() {
+void draw_tab_bar(Project **project) {
   DrawRectangle(0, 0, SCREEN_WIDTH, TOOL_BAR_HEIGHT, get_bg_color());
   GuiLine((Rectangle){0, TOOL_BAR_HEIGHT, SCREEN_WIDTH, 1}, NULL);
 
   GuiEnableTooltip();
   // New
   GuiSetTooltip("New Project");
-  GuiButton(
+  bool is_new_project_pressed = GuiButton(
       (Rectangle){.x = TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 0,
                   .y = TOOL_BAR_PADDING,
                   .width = BUTTON_SIZE,
@@ -69,7 +69,7 @@ void draw_tab_bar() {
       NEW_ICON);
   // Open
   GuiSetTooltip("Open Project");
-  GuiButton(
+  bool is_open_project_pressed = GuiButton(
       (Rectangle){.x = TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 1,
                   .y = TOOL_BAR_PADDING,
                   .width = BUTTON_SIZE,
@@ -92,6 +92,12 @@ void draw_tab_bar() {
                   .height = BUTTON_SIZE},
       EXPORT_ICON);
   GuiDisableTooltip();
+
+  if (is_new_project_pressed)
+    new_project(project);
+
+  if (is_open_project_pressed)
+    open_project(project);
 }
 
 void draw_tool_bar(int *tool_index, int render_width) {
@@ -114,6 +120,9 @@ void draw_inspector(int render_width) {
 
 int deleting_floor_index = -1;
 void draw_floor_buttons(Project *project) {
+  if (project == NULL)
+    return;
+
   if (deleting_floor_index != -1) {
     int message_result =
         GuiMessageBox((Rectangle){(float)SCREEN_WIDTH / 2 - 125,
@@ -132,13 +141,13 @@ void draw_floor_buttons(Project *project) {
 
   // Calculate the button container total height and the y-coord of the
   // container
-  int total_height =
-      (project->floors + 1) * (BUTTON_SIZE) + BUTTON_SPACING * project->floors;
+  int total_height = (project->floor_count + 1) * (BUTTON_SIZE) +
+                     BUTTON_SPACING * project->floor_count;
   int base_y =
       ((SCREEN_HEIGHT - TOOL_BAR_HEIGHT) - total_height) / 2 + TOOL_BAR_HEIGHT;
 
   // Draw floor buttons
-  for (int i = 0; i < project->floors; i++) {
+  for (int i = 0; i < project->floor_count; i++) {
     int y = base_y + (BUTTON_SIZE + BUTTON_SPACING) * i;
     Rectangle btn_rect = (Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE};
     int is_pressed = GuiButton(btn_rect, TextFormat("%d", i + 1));
@@ -158,7 +167,7 @@ void draw_floor_buttons(Project *project) {
   }
 
   // Draw add floor button
-  int y = base_y + (BUTTON_SIZE + BUTTON_SPACING) * project->floors;
+  int y = base_y + (BUTTON_SIZE + BUTTON_SPACING) * project->floor_count;
   int add_floor = GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE}, "+");
 
   // Add floor, if button was pressed

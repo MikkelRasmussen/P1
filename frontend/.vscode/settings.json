@@ -70,5 +70,13 @@
 		"ratio": "c",
 		"sstream": "c"
 	},
-	"cSpell.words": ["OBJGR", "Rotatef", "Translatef"]
+	"cSpell.words": [
+		"nfdopendialogu",
+		"nfdresult",
+		"nfdsavedialogu",
+		"nfdu",
+		"OBJGR",
+		"Rotatef",
+		"Translatef"
+	]
 }

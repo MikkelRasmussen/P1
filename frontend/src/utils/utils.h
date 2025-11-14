@@ -21,7 +21,7 @@ void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
                                int *render_height);
 bool get_screen_size_change(int *width, int *height);
 void draw_centered_text(char *text, int x, int y, int font_size);
-void draw_tab_bar();
+void draw_tab_bar(Project **project);
 void draw_tool_bar(int *tool_index, int render_width);
 void draw_inspector(int render_width);
 void draw_floor_buttons(Project *project);
