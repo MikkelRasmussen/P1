@@ -1,0 +1,1 @@
+add_library(project project.c)

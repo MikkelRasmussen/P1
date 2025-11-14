@@ -1,7 +1,8 @@
-#define VIEW_PORT_DEC_SIZE 0.75
+#define SCREEN_WIDTH GetScreenWidth()
+#define SCREEN_HEIGHT GetScreenHeight()
 #define TOOL_BAR_HEIGHT 56
 #define BUTTON_SPACING 2
-#define BUTTON_SIZE (TOOL_BAR_HEIGHT - 24)
+#define BUTTON_SIZE (TOOL_BAR_HEIGHT - 2 * TOOL_BAR_PADDING)
 #define TOOL_BAR_PADDING 12
 #define INSPECTOR_WIDTH 320
 #define DEFAULT_SCREEN_WIDTH 1280
@@ -10,3 +11,7 @@
 #define OPEN_ICON "#1#"
 #define SAVE_ICON "#2#"
 #define EXPORT_ICON "#7#"
+#define INSPECT_ICON "#21#"
+#define PARKING_ICON "#220#"
+#define ROAD_ICON "#221#"
+#define ENTRANCE_ICON "#222#"

@@ -1,45 +1,34 @@
 #include "utils.h"
 #include "../camera/camera.h"
 #include "../definitions.h"
+#include "../project/project.h"
 #include "rlgl.h"
+#include <math.h>
 #include <raylib.h>
+#include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 
 void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
-                               Rectangle *camera_rect, int *screen_width,
-                               int *screen_height, int *render_width,
+                               Rectangle *camera_rect, int *render_width,
                                int *render_height) {
-  int did_screen_size_change =
-      get_screen_size_change(screen_width, screen_height);
 
-  if (did_screen_size_change) {
-    int old_render_width = *render_width;
-    int old_render_height = *render_height;
-    *render_width = *screen_width - INSPECTOR_WIDTH;
-    *render_height = *screen_height - TOOL_BAR_HEIGHT;
+  if (!IsWindowResized())
+    return;
 
-    UnloadRenderTexture(*camera_texture);
+  int old_render_width = *render_width;
+  int old_render_height = *render_height;
+  *render_width = SCREEN_WIDTH - INSPECTOR_WIDTH;
+  *render_height = SCREEN_HEIGHT - TOOL_BAR_HEIGHT;
 
-    *camera_texture = LoadRenderTexture(*render_width, *render_height);
-    *camera_rect =
-        (Rectangle){0.0f, 0.0f, (float)*render_width, (float)-*render_height};
+  UnloadRenderTexture(*camera_texture);
 
-    update_camera_offset(camera, old_render_width, old_render_height,
-                         *render_width, *render_height);
-  }
-}
+  *camera_texture = LoadRenderTexture(*render_width, *render_height);
+  *camera_rect =
+      (Rectangle){0.0f, 0.0f, (float)*render_width, (float)-*render_height};
 
-int get_screen_size_change(int *width, int *height) {
-  int new_width = GetScreenWidth();
-  int new_height = GetScreenHeight();
-
-  int did_change = *width != new_width || *height != new_height;
-  if (!did_change)
-    return 0;
-
-  *width = new_width;
-  *height = new_height;
-  return 1;
+  update_camera_offset(camera, old_render_width, old_render_height,
+                       *render_width, *render_height);
 }
 
 void draw_centered_text(char *text, int x, int y, int font_size) {
@@ -65,9 +54,9 @@ void draw_grid() {
   rlPopMatrix();
 }
 
-void draw_tab_bar(int width) {
-  DrawRectangle(0, 0, width, TOOL_BAR_HEIGHT, get_bg_color());
-  GuiLine((Rectangle){0, TOOL_BAR_HEIGHT, width, 1}, NULL);
+void draw_tab_bar() {
+  DrawRectangle(0, 0, SCREEN_WIDTH, TOOL_BAR_HEIGHT, get_bg_color());
+  GuiLine((Rectangle){0, TOOL_BAR_HEIGHT, SCREEN_WIDTH, 1}, NULL);
 
   GuiEnableTooltip();
   // New
@@ -105,41 +94,74 @@ void draw_tab_bar(int width) {
   GuiDisableTooltip();
 }
 
-void draw_tool_bar(int *tool_index, int render_width, int screen_height) {
+void draw_tool_bar(int *tool_index, int render_width) {
   GuiToggleGroup((Rectangle){.x = (float)render_width / 2 - 2 * BUTTON_SIZE -
                                   1.5f * BUTTON_SPACING,
-                             .y = screen_height - BUTTON_SIZE,
+                             .y = SCREEN_HEIGHT - BUTTON_SIZE,
                              .width = BUTTON_SIZE,
                              .height = BUTTON_SIZE},
-                 "#21#;#220#;#221#;#222#", tool_index);
+                 TextFormat("%s;%s;%s;%s", INSPECT_ICON, PARKING_ICON,
+                            ROAD_ICON, ENTRANCE_ICON),
+                 tool_index);
 }
 
-void draw_inspector(int render_width, int screen_width, int screen_height) {
+void draw_inspector(int render_width) {
   GuiPanel((Rectangle){render_width, TOOL_BAR_HEIGHT,
-                       screen_width - render_width,
-                       screen_height - TOOL_BAR_HEIGHT},
+                       SCREEN_WIDTH - render_width,
+                       SCREEN_HEIGHT - TOOL_BAR_HEIGHT},
            "Inspector");
 }
 
-void draw_floor_buttons(int *floors, int screen_height) {
+int deleting_floor_index = -1;
+void draw_floor_buttons(Project *project) {
+  if (deleting_floor_index != -1) {
+    int message_result =
+        GuiMessageBox((Rectangle){(float)SCREEN_WIDTH / 2 - 125,
+                                  (float)SCREEN_HEIGHT / 2 - 50, 250, 100},
+                      "#191#Delete Floor",
+                      TextFormat("Are you sure you want to delete floor %d?",
+                                 deleting_floor_index + 1),
+                      "Confirm;Cancel");
+    if (message_result != -1) {
+      if (message_result == 1)
+        project->floors--;
+
+      deleting_floor_index = -1;
+    }
+  }
+
   // Calculate the button container total height and the y-coord of the
   // container
-  int total_height = (*floors + 1) * (BUTTON_SIZE) + BUTTON_SPACING * *floors;
+  int total_height =
+      (project->floors + 1) * (BUTTON_SIZE) + BUTTON_SPACING * project->floors;
   int base_y =
-      ((screen_height - TOOL_BAR_HEIGHT) - total_height) / 2 + TOOL_BAR_HEIGHT;
+      ((SCREEN_HEIGHT - TOOL_BAR_HEIGHT) - total_height) / 2 + TOOL_BAR_HEIGHT;
 
   // Draw floor buttons
-  for (int i = 0; i < *floors; i++) {
+  for (int i = 0; i < project->floors; i++) {
     int y = base_y + (BUTTON_SIZE + BUTTON_SPACING) * i;
-    GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE},
-              TextFormat("%d", i + 1));
+    Rectangle btn_rect = (Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE};
+    int is_pressed = GuiButton(btn_rect, TextFormat("%d", i + 1));
+    int was_right_clicked =
+        IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) &&
+        CheckCollisionPointRec(GetMousePosition(), btn_rect);
+
+    if (was_right_clicked) {
+      deleting_floor_index = i;
+      return;
+    }
+
+    if (!is_pressed)
+      continue;
+
+    project->active_floor = i;
   }
 
   // Draw add floor button
-  int y = base_y + (BUTTON_SIZE + BUTTON_SPACING) * *floors;
+  int y = base_y + (BUTTON_SIZE + BUTTON_SPACING) * project->floors;
   int add_floor = GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE}, "+");
 
   // Add floor, if button was pressed
   if (add_floor)
-    (*floors)++;
+    project->floors++;
 }

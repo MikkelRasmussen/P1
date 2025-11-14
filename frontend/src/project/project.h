@@ -4,5 +4,9 @@
 typedef struct {
   ParkingSpot *parking_spots;
   int floors;
+  int active_floor;
   char zones[26];
-} ParkingLot;
+} Project;
+
+void save_project(Project *project);
+Project load_project();

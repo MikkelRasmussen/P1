@@ -1,26 +1,27 @@
 #include "camera/camera.h"
 #include "definitions.h"
-#include "parking-lot/parking-lot.h"
+#include "project/project.h"
 #include "raylib.h"
 #include "utils/utils.h"
+#include <string.h>
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 int main(void) {
-  int screen_width = DEFAULT_SCREEN_WIDTH;
-  int screen_height = DEFAULT_SCREEN_HEIGHT;
-  ParkingLot lot =
-      (ParkingLot){.parking_spots = 0, .floors = 2, .zones = {'A', 'B'}};
+  Project project = (Project){.parking_spots = NULL,
+                              .floors = 1,
+                              .active_floor = 0,
+                              .zones = {'A', 'B'}};
   int tool_index = 0;
 
   SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-  InitWindow(screen_width, screen_height, "Parking Manager");
+  InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "Parking Manager");
+  SetTargetFPS(60);
 
   GuiLoadStyle("../style.rgs");
   GuiLoadIcons("../icons.rgi", false);
   set_window_icon();
-  SetTargetFPS(60);
 
   int render_width = DEFAULT_SCREEN_WIDTH - INSPECTOR_WIDTH;
   int render_height = DEFAULT_SCREEN_HEIGHT - TOOL_BAR_HEIGHT;
@@ -33,8 +34,7 @@ int main(void) {
   while (!WindowShouldClose()) {
     // Update
     update_screen_size_change(&camera, &camera_texture, &camera_rect,
-                              &screen_width, &screen_height, &render_width,
-                              &render_height);
+                              &render_width, &render_height);
     update_camera(&camera, 0, TOOL_BAR_HEIGHT, render_width, render_height);
 
     // Draw to Camera Render Texture
@@ -55,10 +55,10 @@ int main(void) {
     // Draw Camera Texture
     DrawTextureRec(camera_texture.texture, camera_rect,
                    (Vector2){0, TOOL_BAR_HEIGHT}, WHITE);
-    draw_floor_buttons(&lot.floors, screen_height);
-    draw_tab_bar(screen_width);
-    draw_tool_bar(&tool_index, render_width, screen_height);
-    draw_inspector(render_width, screen_width, screen_height);
+    draw_floor_buttons(&project);
+    draw_tab_bar();
+    draw_tool_bar(&tool_index, render_width);
+    draw_inspector(render_width);
 
     EndDrawing();
   }

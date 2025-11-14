@@ -1,5 +1,7 @@
 #pragma once
+#include "../project/project.h"
 #include "raygui.h"
+#include <stdbool.h>
 
 static inline Color get_bg_color(void) {
   return GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR));
@@ -15,13 +17,12 @@ static inline Color get_line_color(void) {
 
 void set_window_icon();
 void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
-                               Rectangle *camera_rect, int *screen_width,
-                               int *screen_height, int *render_width,
+                               Rectangle *camera_rect, int *render_width,
                                int *render_height);
-int get_screen_size_change(int *width, int *height);
+bool get_screen_size_change(int *width, int *height);
 void draw_centered_text(char *text, int x, int y, int font_size);
-void draw_tab_bar(int width);
-void draw_tool_bar(int *tool_index, int render_width, int screen_height);
-void draw_inspector(int render_width, int screen_width, int screen_height);
-void draw_floor_buttons(int *floors, int screen_height);
+void draw_tab_bar();
+void draw_tool_bar(int *tool_index, int render_width);
+void draw_inspector(int render_width);
+void draw_floor_buttons(Project *project);
 void draw_grid();

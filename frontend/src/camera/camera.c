@@ -51,7 +51,8 @@ void update_camera_zoom(Camera2D *camera, int render_x, int render_y) {
   camera->target = mouseWorldPos;
 
   float scale = 0.2f * wheel;
-  camera->zoom = Clamp(expf(logf(camera->zoom) + scale), 0.25f, 8.0f);
+  float zoom_factor = expf(logf(camera->zoom) + scale);
+  camera->zoom = Clamp(zoom_factor, 0.25f, 8.0f);
 }
 
 void update_camera_drag(Camera2D *camera) {

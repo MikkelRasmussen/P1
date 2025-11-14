@@ -1,1 +1,0 @@
-add_library(parking-lot parking-lot.c)
