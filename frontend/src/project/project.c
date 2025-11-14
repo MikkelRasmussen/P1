@@ -129,3 +129,39 @@ void export_project(Project *project) {
   NFD_FreePathU8(path);
   // TODO: Export project to path
 }
+#include <string.h>
+
+void init_project(Project *project) {
+    project->parking_spots = NULL;
+    project->parking_spots_count = 0;
+    project->parking_spots_capacity = 0;
+
+    project->floors = 1;          // Default single floor
+    project->active_floor = 0;    // Start at floor 0
+
+    // Initialize zones array to zero and default first zone
+    memset(project->zones, 0, sizeof(project->zones));
+    project->zones[0] = 'A';
+}
+
+void set_project_zones(Project *project, const char *zones, int count) {
+    if (count > MAX_ZONES) count = MAX_ZONES;
+
+    // Clear existing zones
+    memset(project->zones, 0, sizeof(project->zones));
+
+    // Copy new zones
+    for (int i = 0; i < count; i++) {
+        project->zones[i] = zones[i];
+    }
+}
+
+void free_project(Project *project) {
+    if (project->parking_spots) {
+        free(project->parking_spots);
+        project->parking_spots = NULL;
+    }
+
+    project->parking_spots_count = 0;
+    project->parking_spots_capacity = 0;
+}

@@ -1,0 +1,26 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Parking Manager",
+            "type": "shell",
+            "command": "gcc",
+            "args": [
+                "${workspaceFolder}/src/main.c",
+                "${workspaceFolder}/src/project/project.c",
+                "${workspaceFolder}/src/parking-spot/parking-spot.c",
+                "-o",
+                "${workspaceFolder}/bin/parking_manager.exe",
+                "-lraylib",
+                "-lopengl32",
+                "-lgdi32",
+                "-lwinmm"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": ["$gcc"]
+        }
+    ]
+}

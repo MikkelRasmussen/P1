@@ -15,3 +15,5 @@
 #define PARKING_ICON "#220#"
 #define ROAD_ICON "#221#"
 #define ENTRANCE_ICON "#222#"
+#define GRID_SIZE 50  // each grid square is 50x50 pixels
+

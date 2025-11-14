@@ -14,7 +14,6 @@ add_subdirectory(src)
 add_subdirectory(src/utils)
 add_subdirectory(src/parking-spot)
 add_subdirectory(src/project)
-add_subdirectory(src/car)
 add_subdirectory(src/camera)
 
 enable_testing()

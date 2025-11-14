@@ -70,7 +70,9 @@
 		"optional": "c",
 		"ratio": "c",
 		"sstream": "c",
-		"definitions.h": "c"
+		"definitions.h": "c",
+		"parking-spot.h": "c",
+		"project.h": "c"
 	},
 	"cSpell.words": [
 		"nfdopendialogu",
