@@ -10,6 +10,7 @@ configure_file(${CMAKE_SOURCE_DIR}/icons.rgi ${CMAKE_BINARY_DIR}/icons.rgi COPYO
 
 find_package(raylib CONFIG REQUIRED)
 find_package(nfd CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 add_subdirectory(src)
 add_subdirectory(src/utils)
 add_subdirectory(src/parking-spot)

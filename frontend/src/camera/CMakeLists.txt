@@ -3,4 +3,6 @@ target_link_libraries(
   camera
   PRIVATE
   raylib
+  m
+  glfw
 )
