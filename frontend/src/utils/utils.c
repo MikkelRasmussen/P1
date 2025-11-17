@@ -8,6 +8,7 @@
 #include <raylib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
@@ -95,9 +96,13 @@ void draw_tab_bar(Project **project) {
   GuiDisableTooltip();
 
   if (*project != NULL) {
-    const char *project_name = (*project)->path;
-    const char *last_slash = strrchr((*project)->path, '\\');
-    char *last_dot = strrchr((*project)->path, '.');
+    char *path_copy = strdup((*project)->path);
+    if (path_copy == NULL)
+      return;
+
+    const char *project_name = path_copy;
+    const char *last_slash = strrchr(path_copy, '\\');
+    char *last_dot = strrchr(path_copy, '.');
 
     if (last_slash != NULL)
       project_name = last_slash + 1;
@@ -110,6 +115,8 @@ void draw_tab_bar(Project **project) {
         project_name,
         TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 4 + BUTTON_SIZE / 2,
         TOOL_BAR_PADDING + BUTTON_SIZE / 2 - font_size / 2, font_size, WHITE);
+
+    free(path_copy);
   }
 
   if (is_new_pressed)

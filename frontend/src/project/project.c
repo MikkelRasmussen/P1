@@ -93,6 +93,8 @@ void new_project(Project **project) {
 
   (*project) = malloc(sizeof(Project));
   (*project)->path = path;
+  (*project)->active_floor = 0;
+  (*project)->floor_count = 1;
 
   // Create new project file at path
   fclose(fopen(path, "w"));
@@ -103,29 +105,32 @@ void open_project(Project **project) {
   if (!get_open_file_path(&path))
     return;
 
-  // Open the file at path in read mode
   FILE *file = fopen(path, "r");
-
   if (file == NULL) {
     NFD_FreePathU8(path);
     return;
   }
 
-  // Get the file size
-  fseek(file, 0, SEEK_END);
-  long file_size = ftell(file);
-  fseek(file, 0, SEEK_SET);
-
-  char file_contents[file_size + 1];
-  fread(file_contents, file_size, 1, file);
-  file_contents[file_size] = '\0';
-  fclose(file);
-
   free_project(project);
   *project = malloc(sizeof(Project));
+  init_project(*project);
   (*project)->path = path;
 
-  // TODO: Parse file contents
+  // Parsing file to project
+  // Skipping labels and reading data
+  // Read floor count
+  fscanf(file, "%*s %d", &(*project)->floor_count);
+
+  // Read active floor
+  fscanf(file, "%*s %d", &(*project)->active_floor);
+
+  // Read floors
+  fscanf(file, "%*s");
+
+  fclose(file);
+
+  printf("Loaded project: %d floors, active floor: %d\n",
+         (*project)->floor_count, (*project)->active_floor);
 }
 
 void save_project(Project *project) {
@@ -134,26 +139,33 @@ void save_project(Project *project) {
     return;
   }
 
-  if (!project->has_change) {
-    printf("Save: No changes to save.\n");
-    return;
-  }
+  // if (!project->has_change) {
+  //   printf("Save: No changes to save.\n");
+  //   return;
+  // }
 
   nfdu8char_t *path = project->path;
 
   // Open the file at path in write mode
   FILE *file = fopen(path, "w");
-
   if (file == NULL) {
+    printf("Error: Could not open file for writing\n");
     NFD_FreePathU8(path);
     return;
   }
 
-  int file_size = 0;
-  char file_contents[file_size + 1];
-  file_contents[file_size] = '\0';
-  fwrite(file_contents, file_size, 1, file);
+  // Write floor count
+  fprintf(file, "FLOOR_COUNT:\n%d\n\n", project->floor_count);
+
+  // Write active floor
+  fprintf(file, "ACTIVE_FLOOR:\n%d\n\n", project->active_floor);
+
+  // Write floors
+  fprintf(file, "FLOORS:\n");
+
   fclose(file);
+
+  printf("Saved project succesfully!\n");
 }
 
 void export_project(Project *project) {
