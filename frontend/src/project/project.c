@@ -13,12 +13,11 @@ void init_project(Project *project) {
   project->spot_count = calloc(project->floor_count, sizeof(int));
 
   // Initialize zones array to zero and default first zone
-  memset(project->zones, 0, sizeof(project->zones));
-  project->zones[0] = 'A';
+  // memset(project->zones, 0, sizeof(project->zones));
+  // project->zones[0] = 'A';
 }
 
-void free_project(Project **project)
-{
+void free_project(Project **project) {
   if ((*project) == NULL)
     return;
 
@@ -47,14 +46,12 @@ void free_project(Project **project)
 //   }
 // }
 
-bool get_save_file_path(nfdu8char_t **path)
-{
-  nfdu8filteritem_t filters[1] = {{"Project Files", "json"}};
+bool get_save_file_path(nfdu8char_t **path) {
+  nfdu8filteritem_t filters[1] = {{"Project Files", "parking"}};
   nfdsavedialogu8args_t args = {.filterList = filters, .filterCount = 1};
   nfdresult_t result = NFD_SaveDialogU8_With(path, &args);
 
-  switch (result)
-  {
+  switch (result) {
   case NFD_OKAY:
     printf("Path: %s\n", *path);
     return true;
@@ -68,14 +65,12 @@ bool get_save_file_path(nfdu8char_t **path)
   return false;
 }
 
-bool get_open_file_path(nfdu8char_t **path)
-{
-  nfdu8filteritem_t filters[1] = {{"Project Files", "json"}};
+bool get_open_file_path(nfdu8char_t **path) {
+  nfdu8filteritem_t filters[1] = {{"Project Files", "parking"}};
   nfdopendialogu8args_t args = {.filterList = filters, .filterCount = 1};
   nfdresult_t result = NFD_OpenDialogU8_With(path, &args);
 
-  switch (result)
-  {
+  switch (result) {
   case NFD_OKAY:
     printf("Path: %s\n", *path);
     return true;
@@ -89,8 +84,7 @@ bool get_open_file_path(nfdu8char_t **path)
   return false;
 }
 
-void new_project(Project **project)
-{
+void new_project(Project **project) {
   nfdu8char_t *path;
   if (!get_save_file_path(&path))
     return;
@@ -98,59 +92,62 @@ void new_project(Project **project)
   free_project(project);
 
   (*project) = malloc(sizeof(Project));
+  init_project(*project);
   (*project)->path = path;
 
-  // Create new project file at path
-  fclose(fopen(path, "w"));
+  save_project(*project);
 }
 
-void open_project(Project **project)
-{
+void open_project(Project **project) {
   nfdu8char_t *path;
   if (!get_open_file_path(&path))
     return;
 
-  // Open the file at path in read mode
   FILE *file = fopen(path, "r");
-
-  if (file == NULL)
-  {
+  if (file == NULL) {
     NFD_FreePathU8(path);
     return;
   }
 
-  // Get the file size
-  fseek(file, 0, SEEK_END);
-  long file_size = ftell(file);
-  fseek(file, 0, SEEK_SET);
-
-  char file_contents[file_size + 1];
-  fread(file_contents, file_size, 1, file);
-  file_contents[file_size] = '\0';
-  fclose(file);
-
   free_project(project);
-  (*project) = malloc(sizeof(Project));
+  *project = malloc(sizeof(Project));
+  init_project(*project);
   (*project)->path = path;
 
-  // TODO: Parse file contents
+  // Parsing file to project
+  // Skipping labels and reading data
+  // Read floor count
+  fscanf(file, "%*s %d", &(*project)->floor_count);
+
+  // Read active floor
+  fscanf(file, "%*s %d", &(*project)->active_floor);
+
+  // Read floors
+  fscanf(file, "%*s");
+
+  fclose(file);
+
+  printf("Loaded project: %d floors, active floor: %d\n",
+         (*project)->floor_count, (*project)->active_floor);
 }
 
-void save_project(Project *project)
-{
-  if (project == NULL)
-  {
+void save_project(Project *project) {
+  if (project == NULL) {
     printf("Save: Project is null...\n");
     return;
   }
+
+  // if (!project->has_change) {
+  //   printf("Save: No changes to save.\n");
+  //   return;
+  // }
 
   nfdu8char_t *path = project->path;
 
   // Open the file at path in write mode
   FILE *file = fopen(path, "w");
-
-  if (file == NULL)
-  {
+  if (file == NULL) {
+    printf("Error: Could not open file for writing\n");
     NFD_FreePathU8(path);
     return;
   }
@@ -178,10 +175,8 @@ void save_project(Project *project)
   printf("Saved project succesfully!\n");
 }
 
-void export_project(Project *project)
-{
-  if (project == NULL)
-  {
+void export_project(Project *project) {
+  if (project == NULL) {
     printf("Export: Project is null...\n");
     return;
   }
