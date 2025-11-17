@@ -7,16 +7,16 @@
 #include <string.h>
 
 void init_project(Project *project) {
-  project->floors = NULL;
-  project->parking_spot_count = NULL;
-  project->parking_spots_capacity = 0;
+  // project->floors = NULL;
+  // project->parking_spot_count = NULL;
+  // project->parking_spots_capacity = 0;
 
   project->floor_count = 1;  // Default single floor
   project->active_floor = 0; // Start at floor 0
 
   // Initialize zones array to zero and default first zone
-  memset(project->zones, 0, sizeof(project->zones));
-  project->zones[0] = 'A';
+  // memset(project->zones, 0, sizeof(project->zones));
+  // project->zones[0] = 'A';
 }
 
 void free_project(Project **project) {
@@ -47,7 +47,7 @@ void set_project_zones(Project *project, const char *zones, int count) {
 }
 
 bool get_save_file_path(nfdu8char_t **path) {
-  nfdu8filteritem_t filters[1] = {{"Project Files", "json"}};
+  nfdu8filteritem_t filters[1] = {{"Project Files", "parking"}};
   nfdsavedialogu8args_t args = {.filterList = filters, .filterCount = 1};
   nfdresult_t result = NFD_SaveDialogU8_With(path, &args);
 
@@ -66,7 +66,7 @@ bool get_save_file_path(nfdu8char_t **path) {
 }
 
 bool get_open_file_path(nfdu8char_t **path) {
-  nfdu8filteritem_t filters[1] = {{"Project Files", "json"}};
+  nfdu8filteritem_t filters[1] = {{"Project Files", "parking"}};
   nfdopendialogu8args_t args = {.filterList = filters, .filterCount = 1};
   nfdresult_t result = NFD_OpenDialogU8_With(path, &args);
 
@@ -92,12 +92,10 @@ void new_project(Project **project) {
   free_project(project);
 
   (*project) = malloc(sizeof(Project));
+  init_project(*project);
   (*project)->path = path;
-  (*project)->active_floor = 0;
-  (*project)->floor_count = 1;
 
-  // Create new project file at path
-  fclose(fopen(path, "w"));
+  save_project(*project);
 }
 
 void open_project(Project **project) {
