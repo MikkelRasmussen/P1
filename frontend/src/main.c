@@ -21,8 +21,8 @@ int main(void) {
   InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "Parking Manager");
   SetTargetFPS(60);
 
-  char zones[] = {'A', 'B', 'C', 'D'};
-  set_project_zones(project, zones, sizeof(zones) / sizeof(zones[0]));
+  // char zones[] = {'A', 'B', 'C', 'D'};
+  // set_project_zones(project, zones, sizeof(zones) / sizeof(zones[0]));
 
   GuiLoadStyle("../style.rgs");
   GuiLoadIcons("../icons.rgi", false);

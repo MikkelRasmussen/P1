@@ -178,8 +178,7 @@ void handle_parking_tool(Project *project, const Camera2D *camera,
     float spot_height = GRID_SIZE * 1.5f;
 
     // Assign first zone by default
-    add_parking_spot(project, world_pos, spot_width, spot_height,
-                     project->zones[0]);
+    add_parking_spot(project, world_pos, spot_width, spot_height, 'A');
   }
 }
 

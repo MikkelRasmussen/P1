@@ -7,12 +7,11 @@
 #include <string.h>
 
 void init_project(Project *project) {
-  // project->floors = NULL;
-  // project->parking_spot_count = NULL;
   // project->parking_spots_capacity = 0;
-
   project->floor_count = 1;  // Default single floor
   project->active_floor = 0; // Start at floor 0
+  project->floors = malloc(sizeof(Project *) * project->floor_count);
+  project->spot_count = calloc(project->floor_count, sizeof(int));
 
   // Initialize zones array to zero and default first zone
   // memset(project->zones, 0, sizeof(project->zones));
@@ -26,25 +25,27 @@ void free_project(Project **project) {
   if ((*project)->path != NULL)
     NFD_FreePathU8((*project)->path);
 
+  free((*project)->floors);
+  free((*project)->spot_count);
   free(*project);
   *project = NULL;
 }
 
-void set_project_zones(Project *project, const char *zones, int count) {
-  if (project == NULL)
-    return;
+// void set_project_zones(Project *project, const char *zones, int count) {
+//   if (project == NULL)
+//     return;
 
-  if (count > MAX_ZONES)
-    count = MAX_ZONES;
+//   if (count > MAX_ZONES)
+//     count = MAX_ZONES;
 
-  // Clear existing zones
-  memset(project->zones, 0, sizeof(project->zones));
+//   // Clear existing zones
+//   memset(project->zones, 0, sizeof(project->zones));
 
-  // Copy new zones
-  for (int i = 0; i < count; i++) {
-    project->zones[i] = zones[i];
-  }
-}
+//   // Copy new zones
+//   for (int i = 0; i < count; i++) {
+//     project->zones[i] = zones[i];
+//   }
+// }
 
 bool get_save_file_path(nfdu8char_t **path) {
   nfdu8filteritem_t filters[1] = {{"Project Files", "parking"}};
@@ -157,6 +158,15 @@ void save_project(Project *project) {
 
   // Write active floor
   fprintf(file, "ACTIVE_FLOOR:\n%d\n\n", project->active_floor);
+
+  // Write spot count
+  fprintf(file, "SPOT_COUNT:\n");
+  for (int i = 0; i < project->floor_count; i++) {
+    for (int j = 0; j < project->spot_count[i]; j++) {
+      fprintf(file, "%d\n", project->spot_count[i]);
+    }
+  }
+  fprintf(file, "\n");
 
   // Write floors
   fprintf(file, "FLOORS:\n");
