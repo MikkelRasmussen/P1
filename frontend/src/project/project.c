@@ -7,7 +7,6 @@
 #include <string.h>
 
 void init_project(Project *project) {
-  // project->parking_spots_capacity = 0;
   project->floor_count = 1;  // Default single floor
   project->active_floor = 0; // Start at floor 0
   project->floors = malloc(sizeof(Project *) * project->floor_count);
