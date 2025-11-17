@@ -94,6 +94,24 @@ void draw_tab_bar(Project **project) {
       EXPORT_ICON);
   GuiDisableTooltip();
 
+  if (*project != NULL) {
+    const char *project_name = (*project)->path;
+    const char *last_slash = strrchr((*project)->path, '\\');
+    char *last_dot = strrchr((*project)->path, '.');
+
+    if (last_slash != NULL)
+      project_name = last_slash + 1;
+
+    if (last_dot != NULL)
+      *last_dot = '\0';
+
+    const int font_size = 18;
+    DrawText(
+        project_name,
+        TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 4 + BUTTON_SIZE / 2,
+        TOOL_BAR_PADDING + BUTTON_SIZE / 2 - font_size / 2, font_size, WHITE);
+  }
+
   if (is_new_pressed)
     new_project(project);
 
@@ -213,4 +231,13 @@ void draw_floor_buttons(Project *project) {
   // Add floor, if button was pressed
   if (add_floor)
     project->floors++;
+}
+
+void handle_save(Project *project) {
+  if (!IsKeyDown(KEY_LEFT_CONTROL))
+    return;
+  if (!IsKeyDown(KEY_S))
+    return;
+
+  save_project(project);
 }

@@ -5,6 +5,7 @@
 #include "utils/utils.h"
 #include <math.h>
 #include <nfd.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -45,6 +46,8 @@ int main(void) {
 
     // Handle parking tool (add parking spot on mouse click)
     handle_parking_tool(project, &camera, tool_index);
+
+    handle_save(project);
 
     // --- Drawing to render texture ---
     BeginTextureMode(camera_texture);

@@ -122,7 +122,7 @@ void open_project(Project **project) {
   fclose(file);
 
   free_project(project);
-  (*project) = malloc(sizeof(Project));
+  *project = malloc(sizeof(Project));
   (*project)->path = path;
 
   // TODO: Parse file contents
@@ -131,6 +131,11 @@ void open_project(Project **project) {
 void save_project(Project *project) {
   if (project == NULL) {
     printf("Save: Project is null...\n");
+    return;
+  }
+
+  if (!project->has_change) {
+    printf("Save: No changes to save.\n");
     return;
   }
 
@@ -148,6 +153,7 @@ void save_project(Project *project) {
   char file_contents[file_size + 1];
   file_contents[file_size] = '\0';
   fwrite(file_contents, file_size, 1, file);
+  fclose(file);
 }
 
 void export_project(Project *project) {

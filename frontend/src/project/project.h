@@ -1,5 +1,6 @@
 #pragma once
 #include "nfd.h"
+#include <stdbool.h>
 
 #define MAX_ZONES 10
 
@@ -14,6 +15,7 @@ typedef struct Project {
   int active_floor;
   int floor_count;
   char zones[MAX_ZONES];
+  bool has_change;
 } Project;
 
 // Function declarations
