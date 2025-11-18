@@ -8,7 +8,7 @@ typedef struct ParkingSpot ParkingSpot;
 typedef struct Project {
   nfdu8char_t *path;
   int floor_count;
-  int *spot_count;
+  int *spot_counts;
   ParkingSpot **floors;
   int parking_spots_capacity;
   int active_floor;

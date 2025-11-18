@@ -10,7 +10,7 @@ void init_project(Project *project) {
   project->floor_count = 1;  // Default single floor
   project->active_floor = 0; // Start at floor 0
   project->floors = malloc(sizeof(Project *) * project->floor_count);
-  project->spot_count = calloc(project->floor_count, sizeof(int));
+  project->spot_counts = calloc(project->floor_count, sizeof(int));
 
   // Initialize zones array to zero and default first zone
   // memset(project->zones, 0, sizeof(project->zones));
@@ -25,7 +25,7 @@ void free_project(Project **project) {
     NFD_FreePathU8((*project)->path);
 
   free((*project)->floors);
-  free((*project)->spot_count);
+  free((*project)->spot_counts);
   free(*project);
   *project = NULL;
 }
@@ -153,16 +153,16 @@ void save_project(Project *project) {
   }
 
   // Write floor count
-  fprintf(file, "FLOOR_COUNT:\n%d\n\n", project->floor_count);
+  fprintf(file, "FLOOR_COUNT: %d\n", project->floor_count);
 
   // Write active floor
-  fprintf(file, "ACTIVE_FLOOR:\n%d\n\n", project->active_floor);
+  fprintf(file, "ACTIVE_FLOOR: %d\n", project->active_floor);
 
-  // Write spot count
+  // Write spot counts
   fprintf(file, "SPOT_COUNT:\n");
   for (int i = 0; i < project->floor_count; i++) {
-    for (int j = 0; j < project->spot_count[i]; j++) {
-      fprintf(file, "%d\n", project->spot_count[i]);
+    for (int j = 0; j < project->spot_counts[i]; j++) {
+      fprintf(file, "%d\n", project->spot_counts[i]);
     }
   }
   fprintf(file, "\n");
