@@ -33,6 +33,7 @@ int lengthOfDataFile() {
 }
 
 int scanDataFile(int id, int *floor, char *area, int *number) {
+    // Åben filen
     FILE *file = fopen("data.csv", "r");
     if (file == NULL) {
         printf("Could not open data.csv\n");
@@ -41,8 +42,9 @@ int scanDataFile(int id, int *floor, char *area, int *number) {
     char line[MAX_LINE];
     int found = 0;
 
-    // Skip the header line
+    // Springe over header linjen (Den første linje i filen)
     fgets(line, sizeof(line), file);
+
 
     while (fgets(line, sizeof(line), file)) {
         char lineCopy[MAX_LINE];

@@ -6,7 +6,7 @@
 #define BACKEND_PARKINGLOT_H
 
 enum type {HANDICAPPED, EV, STANDARD};
-enum status {VACANT, OCCUPIED};
+enum status {VACANT, OCCUPIED, ERROR};
 
 struct parking_lot {
     int floor;

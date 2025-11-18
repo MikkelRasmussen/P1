@@ -28,6 +28,7 @@ const char* statusToString(enum status s) {
     switch (s) {
         case VACANT: return "VACANT";
         case OCCUPIED: return "OCCUPIED";
+        case ERROR: return "ERROR";
         default: return "UNKNOWN";
     }
 }
