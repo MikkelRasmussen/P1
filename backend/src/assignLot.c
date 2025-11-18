@@ -1,0 +1,5 @@
+//
+// Created by mikke on 18/11/2025.
+//
+
+#include "assignLot.h"
