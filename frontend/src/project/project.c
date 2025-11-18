@@ -24,9 +24,15 @@ void free_project(Project **project) {
   if ((*project)->path != NULL)
     NFD_FreePathU8((*project)->path);
 
-  free((*project)->floors);
-  free((*project)->spot_counts);
-  free(*project);
+  if ((*project)->floors != NULL)
+    free((*project)->floors);
+
+  if ((*project)->spot_counts != NULL)
+    free((*project)->spot_counts);
+
+  if (*project != NULL)
+    free(*project);
+
   *project = NULL;
 }
 
@@ -159,13 +165,13 @@ void save_project(Project *project) {
   fprintf(file, "ACTIVE_FLOOR: %d\n", project->active_floor);
 
   // Write spot counts
-  fprintf(file, "SPOT_COUNT:\n");
+  fprintf(file, "SPOT_COUNT: [");
   for (int i = 0; i < project->floor_count; i++) {
     for (int j = 0; j < project->spot_counts[i]; j++) {
-      fprintf(file, "%d\n", project->spot_counts[i]);
+      fprintf(file, "%d, ", project->spot_counts[i]);
     }
   }
-  fprintf(file, "\n");
+  fprintf(file, "]\n");
 
   // Write floors
   fprintf(file, "FLOORS:\n");

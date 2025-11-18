@@ -197,7 +197,7 @@ void draw_floor_buttons(Project *project) {
                       "Confirm;Cancel");
     if (message_result != -1) {
       if (message_result == 1)
-        project->floors--;
+        project->floor_count--;
 
       deleting_floor_index = -1;
     }
@@ -236,13 +236,13 @@ void draw_floor_buttons(Project *project) {
 
   // Add floor, if button was pressed
   if (add_floor)
-    project->floors++;
+    project->floor_count++;
 }
 
 void handle_save(Project *project) {
   if (!IsKeyDown(KEY_LEFT_CONTROL))
     return;
-  if (!IsKeyDown(KEY_S))
+  if (!IsKeyPressed(KEY_S))
     return;
 
   save_project(project);
