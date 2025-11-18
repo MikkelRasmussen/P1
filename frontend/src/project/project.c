@@ -8,6 +8,7 @@
 #include <string.h>
 
 void init_project(Project *project) {
+  project->path = NULL;
   project->floor_count = 1;  // Default single floor
   project->active_floor = 0; // Start at floor 0
 
@@ -70,13 +71,17 @@ void print_project(Project *project) {
 
 void add_floor(Project *project) {
   int new_floor_count = project->floor_count + 1;
-  int *tmp = realloc(project->spot_counts, sizeof(int) * new_floor_count);
-  if (tmp == NULL)
+  int *tmp_spots = realloc(project->spot_counts, sizeof(int) * new_floor_count);
+  if (tmp_spots == NULL)
+    return;
+  ParkingSpot *tmp_floors =
+      realloc(project->floors, sizeof(ParkingSpot *) * new_floor_count);
+  if (tmp_floors == NULL)
     return;
   project->floors[new_floor_count - 1] = NULL;
 
   project->floor_count = new_floor_count;
-  project->spot_counts = tmp;
+  project->spot_counts = tmp_spots;
   project->spot_counts[project->floor_count - 1] = 0;
   project->active_floor = new_floor_count - 1;
 }
