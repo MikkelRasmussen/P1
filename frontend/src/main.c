@@ -29,7 +29,7 @@ int main(void) {
   set_window_icon();
 
   int render_width = DEFAULT_SCREEN_WIDTH - INSPECTOR_WIDTH;
-  int render_height = DEFAULT_SCREEN_HEIGHT - TOOL_BAR_HEIGHT;
+  int render_height = DEFAULT_SCREEN_HEIGHT - TAB_BAR_HEIGHT;
   RenderTexture camera_texture = LoadRenderTexture(render_width, render_height);
   Camera2D camera = init_camera(render_width, render_height);
   Rectangle camera_rect = {0.0f, 0.0f, (float)render_width,
@@ -39,13 +39,14 @@ int main(void) {
     // Update camera and screen size
     update_screen_size_change(&camera, &camera_texture, &camera_rect,
                               &render_width, &render_height);
-    update_camera(&camera, 0, TOOL_BAR_HEIGHT, render_width, render_height);
+    update_camera(&camera, 0, TAB_BAR_HEIGHT, render_width, render_height);
 
     // Handle inspect tool (drag camera)
     handle_inspect_tool(&camera, render_width, render_height, tool_index);
 
     // Handle parking tool (add parking spot on mouse click)
-    handle_parking_tool(project, &camera, tool_index);
+    handle_parking_tool(project, &camera, tool_index, 0, TAB_BAR_HEIGHT,
+                        render_width, render_height);
 
     handle_save(project);
 
@@ -66,7 +67,7 @@ int main(void) {
 
     // Draw Camera Texture
     DrawTextureRec(camera_texture.texture, camera_rect,
-                   (Vector2){0, TOOL_BAR_HEIGHT}, WHITE);
+                   (Vector2){0, TAB_BAR_HEIGHT}, WHITE);
     draw_floor_buttons(project);
     draw_tab_bar(&project);
     draw_tool_bar(&tool_index, render_width);

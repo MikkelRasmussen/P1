@@ -34,5 +34,6 @@ void draw_grid();
 void handle_inspect_tool(Camera2D *camera, int render_x, int render_y,
                          int tool_index);
 void handle_parking_tool(Project *project, const Camera2D *camera,
-                         int tool_index);
+                         int tool_index, int render_x, int render_y,
+                         int render_width, int render_height);
 void handle_save(Project *project);

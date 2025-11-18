@@ -1,9 +1,9 @@
 #define SCREEN_WIDTH GetScreenWidth()
 #define SCREEN_HEIGHT GetScreenHeight()
-#define TOOL_BAR_HEIGHT 56
+#define TAB_BAR_HEIGHT 56
 #define BUTTON_SPACING 2
-#define BUTTON_SIZE (TOOL_BAR_HEIGHT - 2 * TOOL_BAR_PADDING)
-#define TOOL_BAR_PADDING 12
+#define BUTTON_SIZE (TAB_BAR_HEIGHT - 2 * TAB_BAR_PADDING)
+#define TAB_BAR_PADDING 12
 #define INSPECTOR_WIDTH 320
 #define DEFAULT_SCREEN_WIDTH 1280
 #define DEFAULT_SCREEN_HEIGHT 720
@@ -15,5 +15,4 @@
 #define PARKING_ICON "#220#"
 #define ROAD_ICON "#221#"
 #define ENTRANCE_ICON "#222#"
-#define GRID_SIZE 50  // each grid square is 50x50 pixels
-
+#define GRID_SIZE 50 // each grid square is 50x50 pixels

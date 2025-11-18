@@ -21,7 +21,7 @@ void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
   int old_render_width = *render_width;
   int old_render_height = *render_height;
   *render_width = SCREEN_WIDTH - INSPECTOR_WIDTH;
-  *render_height = SCREEN_HEIGHT - TOOL_BAR_HEIGHT;
+  *render_height = SCREEN_HEIGHT - TAB_BAR_HEIGHT;
 
   UnloadRenderTexture(*camera_texture);
 
@@ -57,39 +57,39 @@ void draw_grid() {
 }
 
 void draw_tab_bar(Project **project) {
-  DrawRectangle(0, 0, SCREEN_WIDTH, TOOL_BAR_HEIGHT, get_bg_color());
-  GuiLine((Rectangle){0, TOOL_BAR_HEIGHT, SCREEN_WIDTH, 1}, NULL);
+  DrawRectangle(0, 0, SCREEN_WIDTH, TAB_BAR_HEIGHT, get_bg_color());
+  GuiLine((Rectangle){0, TAB_BAR_HEIGHT, SCREEN_WIDTH, 1}, NULL);
 
   GuiEnableTooltip();
   // New
   GuiSetTooltip("New Project");
   bool is_new_pressed = GuiButton(
-      (Rectangle){.x = TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 0,
-                  .y = TOOL_BAR_PADDING,
+      (Rectangle){.x = TAB_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 0,
+                  .y = TAB_BAR_PADDING,
                   .width = BUTTON_SIZE,
                   .height = BUTTON_SIZE},
       NEW_ICON);
   // Open
   GuiSetTooltip("Open Project");
   bool is_open_pressed = GuiButton(
-      (Rectangle){.x = TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 1,
-                  .y = TOOL_BAR_PADDING,
+      (Rectangle){.x = TAB_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 1,
+                  .y = TAB_BAR_PADDING,
                   .width = BUTTON_SIZE,
                   .height = BUTTON_SIZE},
       OPEN_ICON);
   // Save
   GuiSetTooltip("Save Project");
   bool is_save_pressed = GuiButton(
-      (Rectangle){.x = TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 2,
-                  .y = TOOL_BAR_PADDING,
+      (Rectangle){.x = TAB_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 2,
+                  .y = TAB_BAR_PADDING,
                   .width = BUTTON_SIZE,
                   .height = BUTTON_SIZE},
       SAVE_ICON);
   // Export
   GuiSetTooltip("Export Project");
   bool is_export_pressed = GuiButton(
-      (Rectangle){.x = TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 3,
-                  .y = TOOL_BAR_PADDING,
+      (Rectangle){.x = TAB_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 3,
+                  .y = TAB_BAR_PADDING,
                   .width = BUTTON_SIZE,
                   .height = BUTTON_SIZE},
       EXPORT_ICON);
@@ -113,8 +113,8 @@ void draw_tab_bar(Project **project) {
     const int font_size = 18;
     DrawText(
         project_name,
-        TOOL_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 4 + BUTTON_SIZE / 2,
-        TOOL_BAR_PADDING + BUTTON_SIZE / 2 - font_size / 2, font_size, WHITE);
+        TAB_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 4 + BUTTON_SIZE / 2,
+        TAB_BAR_PADDING + BUTTON_SIZE / 2 - font_size / 2, font_size, WHITE);
 
     free(path_copy);
   }
@@ -144,9 +144,9 @@ void draw_tool_bar(int *tool_index, int render_width) {
 }
 
 void draw_inspector(int render_width) {
-  GuiPanel((Rectangle){render_width, TOOL_BAR_HEIGHT,
+  GuiPanel((Rectangle){render_width, TAB_BAR_HEIGHT,
                        SCREEN_WIDTH - render_width,
-                       SCREEN_HEIGHT - TOOL_BAR_HEIGHT},
+                       SCREEN_HEIGHT - TAB_BAR_HEIGHT},
            "Inspector");
 }
 
@@ -164,21 +164,31 @@ void handle_inspect_tool(Camera2D *camera, int render_x, int render_y,
 }
 
 void handle_parking_tool(Project *project, const Camera2D *camera,
-                         int tool_index) {
+                         int tool_index, int render_x, int render_y,
+                         int render_width, int render_height) {
   if (tool_index == TOOL_PARKING && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-    Vector2 mouse_pos = GetMousePosition();
-    Vector2 world_pos = GetScreenToWorld2D(mouse_pos, *camera);
+    bool is_outside_renderer = get_is_outside_renderer(
+        render_x, render_y, render_width, render_height);
+    if (is_outside_renderer)
+      return;
+
+    Vector2 mouse_screen_pos = GetMousePosition();
+    Vector2 mouse_render_pos =
+        (Vector2){mouse_screen_pos.x - render_x, mouse_screen_pos.y - render_y};
+
+    Vector2 mouse_world_pos = GetScreenToWorld2D(mouse_render_pos, *camera);
 
     // Snap to grid
-    world_pos.x = roundf(world_pos.x / GRID_SIZE) * GRID_SIZE;
-    world_pos.y = roundf(world_pos.y / GRID_SIZE) * GRID_SIZE;
+    Vector2 spot_pos =
+        (Vector2){floor(mouse_world_pos.x / GRID_SIZE) * GRID_SIZE,
+                  floor(mouse_world_pos.y / GRID_SIZE) * GRID_SIZE};
 
     // Define parking spot size
     float spot_width = GRID_SIZE;
     float spot_height = GRID_SIZE * 1.5f;
 
     // Assign first zone by default
-    add_parking_spot(project, world_pos, spot_width, spot_height, 'A');
+    add_parking_spot(project, spot_pos, 'A');
   }
 }
 
@@ -197,7 +207,7 @@ void draw_floor_buttons(Project *project) {
                       "Confirm;Cancel");
     if (message_result != -1) {
       if (message_result == 1)
-        project->floor_count--;
+        remove_floor(project);
 
       deleting_floor_index = -1;
     }
@@ -208,7 +218,7 @@ void draw_floor_buttons(Project *project) {
   int total_height = (project->floor_count + 1) * (BUTTON_SIZE) +
                      BUTTON_SPACING * project->floor_count;
   int base_y =
-      ((SCREEN_HEIGHT - TOOL_BAR_HEIGHT) - total_height) / 2 + TOOL_BAR_HEIGHT;
+      ((SCREEN_HEIGHT - TAB_BAR_HEIGHT) - total_height) / 2 + TAB_BAR_HEIGHT;
 
   // Draw floor buttons
   for (int i = 0; i < project->floor_count; i++) {
@@ -219,9 +229,9 @@ void draw_floor_buttons(Project *project) {
         IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) &&
         CheckCollisionPointRec(GetMousePosition(), btn_rect);
 
-    if (was_right_clicked) {
+    if (was_right_clicked && project->floor_count > 1) {
       deleting_floor_index = i;
-      return;
+      break;
     }
 
     if (!is_pressed)
@@ -232,11 +242,12 @@ void draw_floor_buttons(Project *project) {
 
   // Draw add floor button
   int y = base_y + (BUTTON_SIZE + BUTTON_SPACING) * project->floor_count;
-  int add_floor = GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE}, "+");
+  int should_add_floor =
+      GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE}, "+");
 
   // Add floor, if button was pressed
-  if (add_floor)
-    project->floor_count++;
+  if (should_add_floor)
+    add_floor(project);
 }
 
 void handle_save(Project *project) {
