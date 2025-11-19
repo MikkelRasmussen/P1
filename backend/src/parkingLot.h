@@ -8,6 +8,12 @@
 enum type {HANDICAPPED, EV, STANDARD};
 enum status {VACANT, OCCUPIED, ERROR};
 
+struct car {
+    char number_plate[16];
+    enum type type;
+    int assigned_lot;
+};
+
 struct parking_lot {
     int floor;
     char area[64];
