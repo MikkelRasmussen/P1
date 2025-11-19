@@ -1,5 +1,6 @@
-//
-// Created by Frederik on 19-11-2025.
-//
+#include "mtest.h"
+#include "assignLot.h"
 
-#include "testassignLot.h"
+TEST_CASE(assignSpace, {
+
+})
