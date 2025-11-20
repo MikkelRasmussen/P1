@@ -1,0 +1,3 @@
+[submodule "mtest"]
+	path = mtest
+	url = https://github.com/MortenSchou/mtest
