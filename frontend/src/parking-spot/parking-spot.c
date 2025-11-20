@@ -1,6 +1,7 @@
 #include "parking-spot.h"
 #include "../project/project.h"
 #include <raylib.h>
+#include <stdbool.h>
 #include <stdlib.h>
 
 void add_parking_spot(Project *project, Vector2 position, char zone) {
@@ -8,6 +9,15 @@ void add_parking_spot(Project *project, Vector2 position, char zone) {
     return;
   ParkingSpot **active_floor = &project->floors[project->active_floor];
   int *spot_count = &project->spot_counts[project->active_floor];
+
+  // Check if parking spot at position already exist
+  for (int i = 0; i < *spot_count; i++) {
+    Vector2 pos = (*active_floor)[i].position;
+    bool are_positions_equal = pos.x == position.x && pos.y == position.y;
+    if (are_positions_equal)
+      return;
+  }
+
   int new_spot_count = *spot_count + 1;
 
   ParkingSpot *tmp =

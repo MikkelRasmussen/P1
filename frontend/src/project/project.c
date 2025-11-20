@@ -30,15 +30,20 @@ void free_project(Project **project) {
   if ((*project)->path != NULL)
     NFD_FreePathU8((*project)->path);
 
-  if ((*project)->floors != NULL)
+  // Free each floor's parking spots
+  if ((*project)->floors != NULL) {
+    for (int i = 0; i < (*project)->floor_count; i++) {
+      if ((*project)->floors[i] != NULL) {
+        free((*project)->floors[i]);
+      }
+    }
     free((*project)->floors);
+  }
 
   if ((*project)->spot_counts != NULL)
     free((*project)->spot_counts);
 
-  if (*project != NULL)
-    free(*project);
-
+  free(*project);
   *project = NULL;
 }
 
@@ -192,12 +197,50 @@ void open_project(Project **project) {
   fscanf(file, "%*s %d", &(*project)->active_floor);
 
   // Read spot counts
+  fscanf(file, "%*[^[]"); // Skip everything until '['
+  fscanf(file, "%*c");    // Skip the '['
   for (int i = 0; i < (*project)->floor_count; i++) {
-    fscanf(file, "%*s %d", &(*project)->spot_counts[i]);
+    fscanf(file, " %d",
+           &(*project)->spot_counts[i]); // Leading space skips whitespace
+    if (i < (*project)->floor_count - 1) {
+      fscanf(file, " ,"); // Skip comma with optional whitespace
+    }
   }
+  fscanf(file, " ]"); // Skip closing bracket
 
   // Read floors
-  fscanf(file, "%*s");
+  fscanf(file, "%*s %*s"); // Skip FLOORS: [
+  for (int i = 0; i < (*project)->floor_count; i++) {
+    // Allocate memory for this floor's parking spots
+    int spot_count = (*project)->spot_counts[i];
+    if (spot_count > 0) {
+      (*project)->floors[i] = malloc(sizeof(ParkingSpot) * spot_count);
+      if ((*project)->floors[i] == NULL) {
+        fclose(file);
+        free_project(project);
+        return;
+      }
+    } else {
+      (*project)->floors[i] = NULL;
+    }
+
+    for (int j = 0; j < spot_count; j++) {
+      fscanf(file, "%*[^(]"); // Skip everything until '('
+      fscanf(file, "%*c");    // Skip the '('
+
+      // Position
+      fscanf(file, "%f %*s %f %*s", &(*project)->floors[i][j].position.x,
+             &(*project)->floors[i][j].position.y);
+
+      // Type
+      fscanf(file, "%*s %d %*s", &(*project)->floors[i][j].type);
+
+      // Zone
+      fscanf(file, "%*s %c %*s", &(*project)->floors[i][j].zone);
+    }
+
+    fscanf(file, "%*s"); // Skip closing ']'
+  }
 
   fclose(file);
 
