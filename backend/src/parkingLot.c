@@ -41,3 +41,14 @@ const char* typeToString(enum type t) {
         default: return "UNKNOWN";
     }
 }
+
+//Checker info indenfor indsatte parametre - skelet. Skal have fået funktionen til at indlæse data fra en fil.
+car_info checkInfo(int parking_lot_ID,int car_type,char *license_plate,char *nationality){
+
+    car_info information;
+    information.parking_lot_ID = parking_lot_ID;
+    information.c_Type = car_type;
+    strcpy(information.license_plate, license_plate); strcpy(information.nationality, nationality);
+
+    return information;
+}
