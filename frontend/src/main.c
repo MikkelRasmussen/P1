@@ -12,7 +12,8 @@
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-int main(void) {
+int main(void)
+{
   Project *project = NULL;
   int tool_index = 0;
 
@@ -35,7 +36,8 @@ int main(void) {
   Rectangle camera_rect = {0.0f, 0.0f, (float)render_width,
                            (float)-render_height};
 
-  while (!WindowShouldClose()) {
+  while (!WindowShouldClose())
+  {
     // Update camera and screen size
     update_screen_size_change(&camera, &camera_texture, &camera_rect,
                               &render_width, &render_height);
@@ -57,6 +59,10 @@ int main(void) {
 
     draw_grid();                 // draw background grid
     draw_parking_spots(project); // draw all parking spots
+
+    // Draw parking preview if parking tool is active
+    draw_parking_preview_if_active(
+        tool_index, &camera, 0, TAB_BAR_HEIGHT, render_width, render_height);
 
     EndMode2D();
     EndTextureMode();

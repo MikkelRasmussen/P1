@@ -4,14 +4,16 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-void add_parking_spot(Project *project, Vector2 position, char zone) {
+void add_parking_spot(Project *project, Vector2 position, char zone)
+{
   if (project == NULL)
     return;
   ParkingSpot **active_floor = &project->floors[project->active_floor];
   int *spot_count = &project->spot_counts[project->active_floor];
 
   // Check if parking spot at position already exist
-  for (int i = 0; i < *spot_count; i++) {
+  for (int i = 0; i < *spot_count; i++)
+  {
     Vector2 pos = (*active_floor)[i].position;
     bool are_positions_equal = pos.x == position.x && pos.y == position.y;
     if (are_positions_equal)
@@ -33,13 +35,15 @@ void add_parking_spot(Project *project, Vector2 position, char zone) {
   new_spot->zone = zone;
 }
 
-void draw_parking_spots(Project *project) {
+void draw_parking_spots(Project *project)
+{
   if (project == NULL)
     return;
   ParkingSpot **active_floor = &project->floors[project->active_floor];
   int *spot_count = &project->spot_counts[project->active_floor];
 
-  for (int i = 0; i < *spot_count; i++) {
+  for (int i = 0; i < *spot_count; i++)
+  {
     ParkingSpot *spot = &(*active_floor)[i];
     DrawRectangleV(spot->position, (Vector2){50, 50}, RAYWHITE);
   }
