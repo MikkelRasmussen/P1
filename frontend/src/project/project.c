@@ -32,7 +32,10 @@ void free_project(Project **project) {
       }
     }
     free((*project)->floors);
+<<<<<<< Updated upstream
   }
+=======
+>>>>>>> Stashed changes
 
   if (*project != NULL)
     free(*project);
@@ -175,6 +178,7 @@ void open_project(Project **project) {
   fscanf(file, "%*[^[]"); // Skip everything until '['
   fscanf(file, "%*c");    // Skip the '['
   for (int i = 0; i < (*project)->floor_count; i++) {
+<<<<<<< Updated upstream
     fscanf(
         file, " %d",
         &(*project)->floors[i]->spot_count); // Leading space skips whitespace
@@ -182,6 +186,8 @@ void open_project(Project **project) {
       fscanf(file, " ,"); // Skip comma with optional whitespace
     }
 
+=======
+>>>>>>> Stashed changes
     fscanf(file, "%*s %d", &(*project)->floors[i]->spot_count);
   }
   fscanf(file, " ]"); // Skip closing bracket
