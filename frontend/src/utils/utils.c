@@ -181,22 +181,41 @@ void handle_parking_tool(Project *project, const Camera2D *camera,
   {
     bool is_outside_renderer = get_is_outside_renderer(
         render_x, render_y, render_width, render_height);
+
     if (is_outside_renderer)
       return;
 
     Vector2 mouse_screen_pos = GetMousePosition();
-    Vector2 mouse_render_pos =
-        (Vector2){mouse_screen_pos.x - render_x, mouse_screen_pos.y - render_y};
+    Vector2 mouse_render_pos = {
+        mouse_screen_pos.x - render_x,
+        mouse_screen_pos.y - render_y};
 
     Vector2 mouse_world_pos = GetScreenToWorld2D(mouse_render_pos, *camera);
 
     // Snap to grid
-    Vector2 spot_pos =
-        (Vector2){floor(mouse_world_pos.x / GRID_SIZE) * GRID_SIZE,
-                  floor(mouse_world_pos.y / GRID_SIZE) * GRID_SIZE};
+    Vector2 spot_pos = {
+        floor(mouse_world_pos.x / GRID_SIZE) * GRID_SIZE,
+        floor(mouse_world_pos.y / GRID_SIZE) * GRID_SIZE};
 
-    // Assign first zone by default
-    add_parking_spot(project, spot_pos, 'A');
+    ParkingSpot *floor_spots = project->floors[project->active_floor];
+    int count = project->spot_counts[project->active_floor];
+
+    bool exists = false;
+
+    for (int i = 0; i < count; i++)
+    {
+      if (floor_spots[i].position.x == spot_pos.x &&
+          floor_spots[i].position.y == spot_pos.y)
+      {
+        exists = true;
+        break;
+      }
+    }
+
+    if (exists)
+      remove_parking_spot(project, spot_pos);
+    else
+      add_parking_spot(project, spot_pos, 'A');
   }
 }
 
