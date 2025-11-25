@@ -195,10 +195,6 @@ void handle_parking_tool(Project *project, const Camera2D *camera,
         (Vector2){floor(mouse_world_pos.x / GRID_SIZE) * GRID_SIZE,
                   floor(mouse_world_pos.y / GRID_SIZE) * GRID_SIZE};
 
-    // Define parking spot size
-    float spot_width = GRID_SIZE;
-    float spot_height = GRID_SIZE * 1.5f;
-
     // Assign first zone by default
     add_parking_spot(project, spot_pos, 'A');
   }
@@ -301,6 +297,6 @@ void draw_parking_preview_if_active(int tool_index, Camera2D *camera,
       floorf(world.y / GRID_SIZE) * GRID_SIZE};
 
   DrawRectangleLines(snapped.x, snapped.y,
-                     GRID_SIZE, GRID_SIZE * 1.5f,
-                     ColorAlpha(WHITE, 0.5f));
+                     GRID_SIZE, GRID_SIZE * 1.0f,
+                     ColorAlpha(WHITE, 1.0f));
 }
