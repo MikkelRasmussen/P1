@@ -176,60 +176,40 @@ Vector2 get_mouse_grid_pos(const Camera2D *camera, int render_x, int render_y) {
 
 void handle_parking_tool(Project *project, const Camera2D *camera,
                          int tool_index, int render_x, int render_y,
-                         int render_width, int render_height)
-{
-  if (tool_index == TOOL_PARKING && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-  {
-    bool is_outside_renderer = get_is_outside_renderer(
-        render_x, render_y, render_width, render_height);
-
-    if (is_outside_renderer)
-      return;
                          int render_width, int render_height) {
   bool should_place =
       tool_index == TOOL_PARKING && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   if (!should_place)
     return;
 
-    Vector2 mouse_screen_pos = GetMousePosition();
-    Vector2 mouse_render_pos = {
-        mouse_screen_pos.x - render_x,
-        mouse_screen_pos.y - render_y};
   bool is_outside_renderer =
       get_is_outside_renderer(render_x, render_y, render_width, render_height);
+
+  Floor *floor = &project->floors[project->active_floor];
+  ParkingSpot *floor_spots = floor->spots;
+  bool exists = false;
+  Vector2 grid_pos = get_mouse_grid_pos(camera, render_x, render_y);
+
+  for (int i = 0; i < floor->spot_count; i++) {
+    if (floor_spots[i].position.x == grid_pos.x &&
+        floor_spots[i].position.y == grid_pos.y) {
+      exists = true;
+      break;
+    }
+  }
+
+  if (exists) {
+    remove_parking_spot(project, grid_pos);
+    return;
+  }
+
   if (is_outside_renderer)
     return;
 
-  Vector2 grid_pos = get_mouse_grid_pos(camera, render_x, render_y);
-
-    // Snap to grid
-    Vector2 spot_pos = {
-        floor(mouse_world_pos.x / GRID_SIZE) * GRID_SIZE,
-        floor(mouse_world_pos.y / GRID_SIZE) * GRID_SIZE};
   // Assign first zone by default
   add_parking_spot(project, grid_pos, 'A');
 }
 
-    ParkingSpot *floor_spots = project->floors[project->active_floor];
-    int count = project->spot_counts[project->active_floor];
-
-    bool exists = false;
-
-    for (int i = 0; i < count; i++)
-    {
-      if (floor_spots[i].position.x == spot_pos.x &&
-          floor_spots[i].position.y == spot_pos.y)
-      {
-        exists = true;
-        break;
-      }
-    }
-
-    if (exists)
-      remove_parking_spot(project, spot_pos);
-    else
-      add_parking_spot(project, spot_pos, 'A');
-  }
 void handle_road_tool(Project *project, const Camera2D *camera, int tool_index,
                       int render_x, int render_y, int render_width,
                       int render_height) {

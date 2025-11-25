@@ -64,7 +64,7 @@ int main(void) {
     draw_roads(project);
     draw_entrances(project);
 
-    // Draw parking preview if parking tool is active
+    // Draw parking preview
     draw_selection_preview(&camera, 0, TAB_BAR_HEIGHT, render_width,
                            render_height);
 

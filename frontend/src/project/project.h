@@ -48,6 +48,7 @@ void print_project(Project *project);
 
 // Parking spot
 void add_parking_spot(Project *project, Vector2 position, char zone);
+void remove_parking_spot(Project *project, Vector2 position);
 void draw_parking_spots(Project *project);
 
 // Roads

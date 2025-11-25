@@ -405,6 +405,37 @@ void add_parking_spot(Project *project, Vector2 position, char zone) {
   new_spot->id = *spot_count;
 }
 
+void remove_parking_spot(Project *project, Vector2 position) {
+  if (project == NULL)
+    return;
+
+  ParkingSpot **active_floor_spots =
+      &project->floors[project->active_floor].spots;
+  int *spot_count = &project->floors[project->active_floor].spot_count;
+
+  for (int i = 0; i < *spot_count; i++) {
+    Vector2 pos = (*active_floor_spots)[i].position;
+
+    if (pos.x == position.x && pos.y == position.y) {
+      // Shift remaining items left
+      for (int j = i; j < *spot_count - 1; j++)
+        (*active_floor_spots)[j] = (*active_floor_spots)[j + 1];
+
+      (*spot_count)--;
+
+      // Shrink memory (optional but clean)
+      ParkingSpot *tmp =
+          realloc(*active_floor_spots, sizeof(ParkingSpot) * (*spot_count));
+
+      // Only update pointer if realloc succeeded
+      if (tmp != NULL || *spot_count == 0)
+        *active_floor_spots = tmp;
+
+      return; // Done after removing
+    }
+  }
+}
+
 void draw_parking_spots(Project *project) {
   if (project == NULL)
     return;
