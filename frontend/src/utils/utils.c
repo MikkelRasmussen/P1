@@ -1,7 +1,6 @@
 #include "utils.h"
 #include "../camera/camera.h"
 #include "../definitions.h"
-#include "../parking-spot/parking-spot.h"
 #include "../project/project.h"
 #include "rlgl.h"
 #include <math.h>

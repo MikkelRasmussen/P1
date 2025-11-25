@@ -15,7 +15,6 @@ add_executable(main
 
 # Add subdirectories for your own libraries
 add_subdirectory(utils)
-add_subdirectory(parking-spot)
 add_subdirectory(project)
 add_subdirectory(camera)
 
@@ -25,7 +24,6 @@ target_link_libraries(main
         raylib
         nfd::nfd
         utils
-        parking_spot
         project
         camera
 )

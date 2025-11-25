@@ -1,6 +1,5 @@
 #include "camera/camera.h"
 #include "definitions.h"
-#include "parking-spot/parking-spot.h"
 #include "raylib.h"
 #include "utils/utils.h"
 #include <math.h>
@@ -72,11 +71,18 @@ int main(void)
     ClearBackground(get_bg_color());
 
     // Draw Camera Texture
-    DrawTextureRec(camera_texture.texture, camera_rect,
-                   (Vector2){0, TAB_BAR_HEIGHT}, WHITE);
-    draw_floor_buttons(project);
+    if (project != NULL) {
+      DrawTextureRec(camera_texture.texture, camera_rect,
+                     (Vector2){0, TAB_BAR_HEIGHT}, WHITE);
+      draw_floor_buttons(project);
+      draw_tool_bar(&tool_index, render_width);
+    } else {
+      draw_centered_text(
+          "No project open!", (SCREEN_WIDTH - INSPECTOR_WIDTH) / 2,
+          (SCREEN_HEIGHT - TAB_BAR_HEIGHT) / 2 + TAB_BAR_HEIGHT, 20);
+    }
+
     draw_tab_bar(&project);
-    draw_tool_bar(&tool_index, render_width);
     draw_inspector(render_width);
 
     EndDrawing();

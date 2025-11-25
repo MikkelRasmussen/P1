@@ -1,5 +1,4 @@
 #include "project.h"
-#include "../parking-spot/parking-spot.h"
 #include "nfd.h"
 #include "raygui.h"
 #include <raylib.h>
@@ -16,11 +15,6 @@ void init_project(Project *project) {
   if (project->floors == NULL)
     return;
   project->floors[0] = NULL;
-
-  project->spot_counts = malloc(sizeof(int));
-  if (project->spot_counts == NULL)
-    return;
-  project->spot_counts[0] = 0;
 }
 
 void free_project(Project **project) {
@@ -40,10 +34,9 @@ void free_project(Project **project) {
     free((*project)->floors);
   }
 
-  if ((*project)->spot_counts != NULL)
-    free((*project)->spot_counts);
+  if (*project != NULL)
+    free(*project);
 
-  free(*project);
   *project = NULL;
 }
 
@@ -52,7 +45,7 @@ void print_project(Project *project) {
   printf("active_floor: %d\n", project->active_floor);
   printf("spot_counts: [");
   for (int i = 0; i < project->floor_count; i++) {
-    printf("%d", project->spot_counts[i]);
+    printf("%d", project->floors[i]->spot_count);
     if (i >= project->floor_count - 1)
       break;
     printf(", ");
@@ -61,8 +54,8 @@ void print_project(Project *project) {
   printf("floors: [\n");
   for (int i = 0; i < project->floor_count; i++) {
     printf("  floor %d: [\n", i);
-    for (int j = 0; j < project->spot_counts[i]; j++) {
-      ParkingSpot spot = project->floors[i][j];
+    for (int j = 0; j < project->floors[i]->spot_count; j++) {
+      ParkingSpot spot = project->floors[i]->spots[j];
       printf("    spot %d: {\n", j);
       printf("      position: (%f, %f),\n", spot.position.x, spot.position.y);
       printf("      type: %d,\n", spot.type);
@@ -76,29 +69,19 @@ void print_project(Project *project) {
 
 void add_floor(Project *project) {
   int new_floor_count = project->floor_count + 1;
-  int *tmp_spots = realloc(project->spot_counts, sizeof(int) * new_floor_count);
-  if (tmp_spots == NULL)
-    return;
-  ParkingSpot *tmp_floors =
-      realloc(project->floors, sizeof(ParkingSpot *) * new_floor_count);
+  Floor *tmp_floors =
+      realloc(project->floors, sizeof(Floor *) * new_floor_count);
   if (tmp_floors == NULL)
     return;
   project->floors[new_floor_count - 1] = NULL;
 
   project->floor_count = new_floor_count;
-  project->spot_counts = tmp_spots;
-  project->spot_counts[project->floor_count - 1] = 0;
   project->active_floor = new_floor_count - 1;
 }
 
 void remove_floor(Project *project) {
   int new_floor_count = project->floor_count - 1;
-  int *tmp = realloc(project->spot_counts, sizeof(int) * new_floor_count);
-  if (tmp == NULL)
-    return;
-
   project->floor_count = new_floor_count;
-  project->spot_counts = tmp;
 
   if (project->active_floor >= new_floor_count)
     project->active_floor = new_floor_count - 1;
@@ -177,14 +160,6 @@ void open_project(Project **project) {
   // Read floor count
   fscanf(file, "%*s %d", &(*project)->floor_count);
 
-  // Reallocate spot_counts for the actual number of floors
-  (*project)->spot_counts = calloc((*project)->floor_count, sizeof(int));
-  if ((*project)->spot_counts == NULL) {
-    fclose(file);
-    free_project(project);
-    return;
-  }
-
   // Reallocate floors array for the actual number of floors
   (*project)->floors = calloc((*project)->floor_count, sizeof(ParkingSpot *));
   if ((*project)->floors == NULL) {
@@ -200,11 +175,13 @@ void open_project(Project **project) {
   fscanf(file, "%*[^[]"); // Skip everything until '['
   fscanf(file, "%*c");    // Skip the '['
   for (int i = 0; i < (*project)->floor_count; i++) {
-    fscanf(file, " %d",
-           &(*project)->spot_counts[i]); // Leading space skips whitespace
+    fscanf(
+        file, " %d",
+        &(*project)->floors[i]->spot_count); // Leading space skips whitespace
     if (i < (*project)->floor_count - 1) {
       fscanf(file, " ,"); // Skip comma with optional whitespace
     }
+    fscanf(file, "%*s %d", &(*project)->floors[i]->spot_count);
   }
   fscanf(file, " ]"); // Skip closing bracket
 
@@ -212,7 +189,7 @@ void open_project(Project **project) {
   fscanf(file, "%*s %*s"); // Skip FLOORS: [
   for (int i = 0; i < (*project)->floor_count; i++) {
     // Allocate memory for this floor's parking spots
-    int spot_count = (*project)->spot_counts[i];
+    int spot_count = (*project)->floors[i]->spot_count;
     if (spot_count > 0) {
       (*project)->floors[i] = malloc(sizeof(ParkingSpot) * spot_count);
       if ((*project)->floors[i] == NULL) {
@@ -229,14 +206,14 @@ void open_project(Project **project) {
       fscanf(file, "%*c");    // Skip the '('
 
       // Position
-      fscanf(file, "%f %*s %f %*s", &(*project)->floors[i][j].position.x,
-             &(*project)->floors[i][j].position.y);
+      fscanf(file, "%f %*s %f %*s", &(*project)->floors[i]->spots[j].position.x,
+             &(*project)->floors[i]->spots[j].position.y);
 
       // Type
-      fscanf(file, "%*s %d %*s", &(*project)->floors[i][j].type);
+      fscanf(file, "%*s %d %*s", &(*project)->floors[i]->spots[j].type);
 
       // Zone
-      fscanf(file, "%*s %c %*s", &(*project)->floors[i][j].zone);
+      fscanf(file, "%*s %c %*s", &(*project)->floors[i]->spots[j].zone);
     }
 
     fscanf(file, "%*s"); // Skip closing ']'
@@ -272,7 +249,7 @@ void save_project(Project *project) {
   // Write spot counts
   fprintf(file, "SPOT_COUNT: [");
   for (int i = 0; i < project->floor_count; i++) {
-    fprintf(file, "%d", project->spot_counts[i]);
+    fprintf(file, "%d", project->floors[i]->spot_count);
     if (i >= project->floor_count - 1)
       break;
     fprintf(file, ", ");
@@ -283,8 +260,8 @@ void save_project(Project *project) {
   fprintf(file, "FLOORS: [\n");
   for (int i = 0; i < project->floor_count; i++) {
     fprintf(file, "  Floor %d: [\n", i);
-    for (int j = 0; j < project->spot_counts[i]; j++) {
-      ParkingSpot spot = project->floors[i][j];
+    for (int j = 0; j < project->floors[i]->spot_count; j++) {
+      ParkingSpot spot = project->floors[i]->spots[j];
       fprintf(file, "    Spot %d: {\n", j);
       fprintf(file, "      POSITION: (%f, %f),\n", spot.position.x,
               spot.position.y);
@@ -292,7 +269,7 @@ void save_project(Project *project) {
       fprintf(file, "      ZONE: %c\n", spot.zone);
       fprintf(file, "    }");
 
-      if (j < project->spot_counts[i] - 1)
+      if (j < project->floors[i]->spot_count - 1)
         fprintf(file, ",");
 
       fprintf(file, "\n");
@@ -320,3 +297,38 @@ void export_project(Project *project) {
   NFD_FreePathU8(path);
   // TODO: Export project to path
 }
+
+#pragma region Parking Spot
+void add_parking_spot(Project *project, Vector2 position, char zone) {
+  if (project == NULL)
+    return;
+  ParkingSpot **active_floor_spots =
+      &project->floors[project->active_floor]->spots;
+  int *spot_count = &project->floors[project->active_floor]->spot_count;
+  int new_spot_count = *spot_count + 1;
+
+  ParkingSpot *tmp =
+      realloc(*active_floor_spots, sizeof(ParkingSpot) * new_spot_count);
+  if (tmp == NULL)
+    return;
+
+  *active_floor_spots = tmp;
+  *spot_count = new_spot_count;
+  ParkingSpot *new_spot = &(*active_floor_spots)[new_spot_count - 1];
+  new_spot->position = position;
+  new_spot->type = Default;
+  new_spot->zone = zone;
+}
+
+void draw_parking_spots(Project *project) {
+  if (project == NULL)
+    return;
+  ParkingSpot **active_floor = &project->floors[project->active_floor]->spots;
+  int *spot_count = &project->floors[project->active_floor]->spot_count;
+
+  for (int i = 0; i < *spot_count; i++) {
+    ParkingSpot *spot = &(*active_floor)[i];
+    DrawRectangleV(spot->position, (Vector2){50, 50}, RAYWHITE);
+  }
+}
+#pragma endregion
