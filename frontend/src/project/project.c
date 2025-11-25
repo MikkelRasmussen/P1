@@ -181,6 +181,7 @@ void open_project(Project **project) {
     if (i < (*project)->floor_count - 1) {
       fscanf(file, " ,"); // Skip comma with optional whitespace
     }
+
     fscanf(file, "%*s %d", &(*project)->floors[i]->spot_count);
   }
   fscanf(file, " ]"); // Skip closing bracket
