@@ -217,6 +217,7 @@ void handle_road_tool(Project *project, const Camera2D *camera, int tool_index,
       tool_index == TOOL_ROAD && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   if (!should_place)
     return;
+    
 
   bool is_outside_renderer =
       get_is_outside_renderer(render_x, render_y, render_width, render_height);
@@ -224,6 +225,23 @@ void handle_road_tool(Project *project, const Camera2D *camera, int tool_index,
     return;
 
   Vector2 grid_pos = get_mouse_grid_pos(camera, render_x, render_y);
+
+  Floor *floor = &project->floors[project->active_floor];
+
+  // Cehcks if a road already exists at this position
+  bool exists = false;
+  for(int i = 0; i < floor->road_count; i++) {
+    if (floor->roads[i].position.x == grid_pos.x &&
+        floor->roads[i].position.y == grid_pos.y) {
+      exists = true;
+      break;
+    }
+  }
+
+  if (exists) {
+    remove_roads(project, grid_pos);
+    return;
+  }
 
   // Assign first zone by default
   add_road(project, grid_pos);
@@ -243,6 +261,20 @@ void handle_entrance_tool(Project *project, const Camera2D *camera,
     return;
 
   Vector2 grid_pos = get_mouse_grid_pos(camera, render_x, render_y);
+
+  bool exists = false;
+  for(int i = 0; i < project->floors[project->active_floor].entrance_count; i++) {
+    Vector2 entrance_pos = project->floors[project->active_floor].entrances[i];
+    if (entrance_pos.x == grid_pos.x && entrance_pos.y == grid_pos.y) {
+      exists = true;
+      break;
+    }
+  }
+
+  if (exists) {
+    remove_entrance(project, grid_pos);
+    return;
+  }
 
   // Assign first zone by default
   add_entrance(project, grid_pos);

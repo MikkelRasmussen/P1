@@ -413,25 +413,25 @@ void remove_parking_spot(Project *project, Vector2 position) {
       &project->floors[project->active_floor].spots;
   int *spot_count = &project->floors[project->active_floor].spot_count;
 
+  // Loops through all parking spots to find the one at position
   for (int i = 0; i < *spot_count; i++) {
     Vector2 pos = (*active_floor_spots)[i].position;
 
+    // If found, remove it by shifting the rest down
     if (pos.x == position.x && pos.y == position.y) {
-      // Shift remaining items left
       for (int j = i; j < *spot_count - 1; j++)
         (*active_floor_spots)[j] = (*active_floor_spots)[j + 1];
 
+      // Decrease spot count
       (*spot_count)--;
 
-      // Shrink memory (optional but clean)
       ParkingSpot *tmp =
           realloc(*active_floor_spots, sizeof(ParkingSpot) * (*spot_count));
 
-      // Only update pointer if realloc succeeded
       if (tmp != NULL || *spot_count == 0)
         *active_floor_spots = tmp;
 
-      return; // Done after removing
+      return; 
     }
   }
 }
@@ -471,6 +471,36 @@ void add_road(Project *project, Vector2 position) {
   new_spot->distance = 0;
 }
 
+void remove_roads(Project *project, Vector2 position) {
+  if (project == NULL)
+    return;
+
+  Road **active_floor_roads = &project->floors[project->active_floor].roads;
+  int *road_count = &project->floors[project->active_floor].road_count;
+
+  // Loops through all roads to find the one at position
+  for(int i = 0; i < *road_count; i++) {
+    Vector2 pos = (*active_floor_roads)[i].position;
+
+    // If found, remove it by shifting the rest down
+    if (pos.x == position.x && pos.y == position.y) {
+      for (int j = i; j < *road_count - 1; j++)
+        (*active_floor_roads)[j] = (*active_floor_roads)[j + 1];
+      
+        // Decrease road count
+      (*road_count)--;
+
+      Road *tmp =
+          realloc(*active_floor_roads, sizeof(Road) * (*road_count));
+      
+      if (tmp != NULL || *road_count == 0)
+        *active_floor_roads = tmp;
+
+      return; 
+    }
+  }
+}
+
 void draw_roads(Project *project) {
   if (project == NULL)
     return;
@@ -505,6 +535,37 @@ void add_entrance(Project *project, Vector2 position) {
   *active_floor_entrances = tmp;
   Vector2 *new_spot = &(*active_floor_entrances)[*entrance_count - 1];
   *new_spot = position;
+}
+
+void remove_entrance(Project *project, Vector2 position) {
+  if (project == NULL)
+    return;
+
+  // Loops through all entrances to find the one at position
+  Vector2 **active_floor_entrances =
+      &project->floors[project->active_floor].entrances;
+  int *entrance_count = &project->floors[project->active_floor].entrance_count;
+
+  for (int i = 0; i < *entrance_count; i++) {
+    Vector2 pos = (*active_floor_entrances)[i];
+
+    // If found, remove it by shifting the rest down
+    if (pos.x == position.x && pos.y == position.y) {
+      for (int j = i; j < *entrance_count - 1; j++)
+        (*active_floor_entrances)[j] = (*active_floor_entrances)[j + 1];
+
+      // Decrease entrance count
+      (*entrance_count)--;
+
+      Vector2 *tmp = realloc(*active_floor_entrances,
+                             sizeof(Vector2) * (*entrance_count));
+
+      if (tmp != NULL || *entrance_count == 0)
+        *active_floor_entrances = tmp;
+
+      return; 
+    }
+  }
 }
 
 void draw_entrances(Project *project) {
