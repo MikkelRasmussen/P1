@@ -45,8 +45,8 @@ int main(void) {
     handle_inspect_tool(&camera, render_width, render_height, tool_index);
 
     // Handle parking tool (add parking spot on mouse click)
-    handle_parking_tool(project, &camera, tool_index, 0, TAB_BAR_HEIGHT,
-                        render_width, render_height);
+    handle_spot_tool(project, &camera, tool_index, 0, TAB_BAR_HEIGHT,
+                     render_width, render_height);
     handle_road_tool(project, &camera, tool_index, 0, TAB_BAR_HEIGHT,
                      render_width, render_height);
     handle_entrance_tool(project, &camera, tool_index, 0, TAB_BAR_HEIGHT,
