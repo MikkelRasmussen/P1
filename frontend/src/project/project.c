@@ -80,11 +80,14 @@ void print_project(Project *project) {
       printf("      spot %d: {\n", j);
 
       // spot->position
-      printf("        position: (%f, %f),\n", spot->position.x,
+      printf("        position: (%f, %f)\n", spot->position.x,
              spot->position.y);
 
       // spot->type
-      printf("        type: %d,\n", spot->type);
+      printf("        type: %d\n", spot->type);
+
+      // spot->id
+      printf("        id: %d\n", spot->id);
 
       // spot->zone
       printf("        zone: %c\n", spot->zone);
@@ -101,11 +104,11 @@ void print_project(Project *project) {
       printf("      road %d: {\n", j);
 
       // road->position
-      printf("        position: (%f, %f),\n", road->position.x,
+      printf("        position: (%f, %f)\n", road->position.x,
              road->position.y);
 
       // road->distance
-      printf("        distance: %d,\n", road->distance);
+      printf("        distance: %d\n", road->distance);
 
       printf("      }\n");
     }
@@ -118,7 +121,7 @@ void print_project(Project *project) {
       Vector2 *entrance = &floor[i].entrances[j];
 
       // entrance->position
-      printf("      road %d: %f %f\n", j, entrance->x, entrance->y);
+      printf("      road %d: (%f, %f)\n", j, entrance->x, entrance->y);
     }
     printf("    ]\n");
     printf("  }\n");
@@ -243,37 +246,101 @@ void open_project(Project **project) {
   fscanf(file, "%*s %d", &(*project)->active_floor);
 
   // Read floors
-  fscanf(file, "%*s %*s"); // Skip FLOORS: [
+  fscanf(file, "%*s %*s"); // Skip "floors: ["
   for (int i = 0; i < (*project)->floor_count; i++) {
+    Floor *floor = &(*project)->floors[i];
+
+    fscanf(file, "%*s %*s %*s"); // Skip "floor n: {"
+    // Read spot count
+    fscanf(file, "%*s %d", &floor->spot_count);
+
     // Allocate memory for this floor's parking spots
-    int spot_count = (*project)->floors[i].spot_count;
-    if (spot_count > 0) {
-      (*project)->floors[i].spots = malloc(sizeof(ParkingSpot) * spot_count);
-      if ((*project)->floors[i].spots == NULL) {
+    if (floor->spot_count > 0) {
+      floor->spots = malloc(sizeof(ParkingSpot) * floor->spot_count);
+      if (floor->spots == NULL) {
         fclose(file);
         free_project(project);
         return;
       }
     } else {
-      (*project)->floors[i].spots = NULL;
+      free(floor->spots);
+      floor->spots = NULL;
     }
 
-    for (int j = 0; j < spot_count; j++) {
+    for (int j = 0; j < floor->spot_count; j++) {
       fscanf(file, "%*[^(]"); // Skip everything until '('
       fscanf(file, "%*c");    // Skip the '('
 
       // Position
-      fscanf(file, "%f %*s %f %*s", &(*project)->floors[i].spots[j].position.x,
-             &(*project)->floors[i].spots[j].position.y);
+      fscanf(file, "%f %*s %f %*s", &floor->spots[j].position.x,
+             &floor->spots[j].position.y);
 
       // Type
-      fscanf(file, "%*s %d %*s", &(*project)->floors[i].spots[j].type);
+      fscanf(file, "%*s %d", &floor->spots[j].type);
+
+      // ID
+      fscanf(file, "%*s %d", &floor->spots[j].id);
 
       // Zone
-      fscanf(file, "%*s %c %*s", &(*project)->floors[i].spots[j].zone);
+      fscanf(file, "%*s %c %*s", &floor->spots[j].zone);
     }
 
     fscanf(file, "%*s"); // Skip closing ']'
+
+    // Read road count
+    fscanf(file, "%*s %d", &floor->road_count);
+
+    // Allocate memory for this floor's parking spots
+    if (floor->road_count > 0) {
+      floor->roads = malloc(sizeof(ParkingSpot) * floor->road_count);
+      if (floor->roads == NULL) {
+        fclose(file);
+        free_project(project);
+        return;
+      }
+    } else {
+      free(floor->roads);
+      floor->roads = NULL;
+    }
+
+    for (int j = 0; j < floor->road_count; j++) {
+      fscanf(file, "%*[^(]"); // Skip everything until '('
+      fscanf(file, "%*c");    // Skip the '('
+
+      // Position
+      fscanf(file, "%f %*s %f %*s", &floor->roads[j].position.x,
+             &floor->roads[j].position.y);
+
+      // Distance
+      fscanf(file, "%*s %d %*s", &floor->roads[j].distance);
+    }
+
+    fscanf(file, "%*s"); // Skip closing ']'
+
+    // Read entrance count
+    fscanf(file, "%*s %d", &floor->entrance_count);
+
+    // Allocate memory for this floor's entrances
+    if (floor->entrance_count > 0) {
+      floor->entrances = malloc(sizeof(ParkingSpot) * floor->entrance_count);
+      if (floor->entrances == NULL) {
+        fclose(file);
+        free_project(project);
+        return;
+      }
+    } else {
+      free(floor->entrances);
+      floor->entrances = NULL;
+    }
+
+    for (int j = 0; j < floor->entrance_count; j++) {
+      fscanf(file, "%*[^(]"); // Skip everything until '('
+      fscanf(file, "%*c");    // Skip the '('
+
+      // Position
+      fscanf(file, "%f %*s %f %*s", &floor->entrances[j].x,
+             &floor->entrances[j].y);
+    }
   }
 
   fclose(file);
@@ -317,11 +384,14 @@ void save_project(Project *project) {
       fprintf(file, "      spot %d: {\n", j);
 
       // spot->position
-      fprintf(file, "        position: (%f, %f),\n", spot->position.x,
+      fprintf(file, "        position: (%f, %f)\n", spot->position.x,
               spot->position.y);
 
       // spot->type
-      fprintf(file, "        type: %d,\n", spot->type);
+      fprintf(file, "        type: %d\n", spot->type);
+
+      // spot->id
+      fprintf(file, "        id: %d\n", spot->id);
 
       // spot->zone
       fprintf(file, "        zone: %c\n", spot->zone);
@@ -338,11 +408,11 @@ void save_project(Project *project) {
       fprintf(file, "      road %d: {\n", j);
 
       // road->position
-      fprintf(file, "        position: (%f, %f),\n", road->position.x,
+      fprintf(file, "        position: (%f, %f)\n", road->position.x,
               road->position.y);
 
       // road->distance
-      fprintf(file, "        distance: %d,\n", road->distance);
+      fprintf(file, "        distance: %d\n", road->distance);
 
       fprintf(file, "      }\n");
     }
@@ -355,7 +425,7 @@ void save_project(Project *project) {
       Vector2 *entrance = &floor[i].entrances[j];
 
       // entrance->position
-      fprintf(file, "      road %d: %f %f\n", j, entrance->x, entrance->y);
+      fprintf(file, "      road %d: (%f, %f)\n", j, entrance->x, entrance->y);
     }
     fprintf(file, "    ]\n");
     fprintf(file, "  }\n");
@@ -431,7 +501,7 @@ void remove_parking_spot(Project *project, Vector2 position) {
       if (tmp != NULL || *spot_count == 0)
         *active_floor_spots = tmp;
 
-      return; 
+      return;
     }
   }
 }
@@ -479,24 +549,23 @@ void remove_roads(Project *project, Vector2 position) {
   int *road_count = &project->floors[project->active_floor].road_count;
 
   // Loops through all roads to find the one at position
-  for(int i = 0; i < *road_count; i++) {
+  for (int i = 0; i < *road_count; i++) {
     Vector2 pos = (*active_floor_roads)[i].position;
 
     // If found, remove it by shifting the rest down
     if (pos.x == position.x && pos.y == position.y) {
       for (int j = i; j < *road_count - 1; j++)
         (*active_floor_roads)[j] = (*active_floor_roads)[j + 1];
-      
-        // Decrease road count
+
+      // Decrease road count
       (*road_count)--;
 
-      Road *tmp =
-          realloc(*active_floor_roads, sizeof(Road) * (*road_count));
-      
+      Road *tmp = realloc(*active_floor_roads, sizeof(Road) * (*road_count));
+
       if (tmp != NULL || *road_count == 0)
         *active_floor_roads = tmp;
 
-      return; 
+      return;
     }
   }
 }
@@ -557,13 +626,13 @@ void remove_entrance(Project *project, Vector2 position) {
       // Decrease entrance count
       (*entrance_count)--;
 
-      Vector2 *tmp = realloc(*active_floor_entrances,
-                             sizeof(Vector2) * (*entrance_count));
+      Vector2 *tmp =
+          realloc(*active_floor_entrances, sizeof(Vector2) * (*entrance_count));
 
       if (tmp != NULL || *entrance_count == 0)
         *active_floor_entrances = tmp;
 
-      return; 
+      return;
     }
   }
 }

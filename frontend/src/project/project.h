@@ -53,8 +53,10 @@ void draw_parking_spots(Project *project);
 
 // Roads
 void add_road(Project *project, Vector2 position);
+void remove_roads(Project *project, Vector2 position);
 void draw_roads(Project *project);
 
 // Entrances
 void add_entrance(Project *project, Vector2 position);
+void remove_entrance(Project *project, Vector2 position);
 void draw_entrances(Project *project);
