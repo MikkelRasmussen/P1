@@ -1,5 +1,6 @@
 #include "camera.h"
 #include "raymath.h"
+#include <raylib.h>
 
 Camera2D init_camera(int render_width, int render_height) {
   return (Camera2D){.offset = {render_width / 2.0f, render_height / 2.0f},
@@ -8,23 +9,21 @@ Camera2D init_camera(int render_width, int render_height) {
                     .zoom = 1.0f};
 }
 
-void update_camera(Camera2D *camera, int render_x, int render_y,
-                   int render_width, int render_height) {
-  if (get_is_outside_renderer(render_x, render_y, render_width, render_height))
+void update_camera(Camera2D *camera, Rectangle render_rect) {
+  if (get_is_outside_renderer(render_rect))
     return;
 
-  update_camera_zoom(camera, render_x, render_y);
+  update_camera_zoom(camera, render_rect.x, render_rect.y);
   update_camera_drag(camera);
 }
 
-int get_is_outside_renderer(int render_x, int render_y, int render_width,
-                            int render_height) {
+int get_is_outside_renderer(Rectangle render_rect) {
   Vector2 mouseScreenPos = GetMousePosition();
-  Vector2 mouseRenderPos =
-      (Vector2){mouseScreenPos.x - render_x, mouseScreenPos.y - render_y};
+  Vector2 mouseRenderPos = (Vector2){mouseScreenPos.x - render_rect.x,
+                                     mouseScreenPos.y - render_rect.y};
 
-  return mouseRenderPos.x < 0 || mouseRenderPos.x > render_width ||
-         mouseRenderPos.y < 0 || mouseRenderPos.y > render_height;
+  return mouseRenderPos.x < 0 || mouseRenderPos.x > render_rect.width ||
+         mouseRenderPos.y < 0 || mouseRenderPos.y > render_rect.height;
 }
 
 void update_camera_offset(Camera2D *camera, int old_width, int old_height,

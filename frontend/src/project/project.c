@@ -8,7 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-void init_project(Project *project) {
+Project *project = NULL;
+
+void init_project() {
   project->path = NULL;
   project->floor_count = 1;  // Default single floor
   project->active_floor = 0; // Start at floor 0
@@ -32,17 +34,17 @@ void init_floor(Floor *floor) {
                    .entrance_count = 0};
 }
 
-void free_project(Project **project) {
-  if ((*project) == NULL)
+void free_project() {
+  if (project == NULL)
     return;
 
-  if ((*project)->path != NULL)
-    NFD_FreePathU8((*project)->path);
+  if (project->path != NULL)
+    NFD_FreePathU8(project->path);
 
   // Free each floor's parking spots
-  if ((*project)->floors != NULL) {
-    for (int i = 0; i < (*project)->floor_count; i++) {
-      Floor *floor = &(*project)->floors[i];
+  if (project->floors != NULL) {
+    for (int i = 0; i < project->floor_count; i++) {
+      Floor *floor = &project->floors[i];
 
       if (floor->spots != NULL) {
         free(floor->spots);
@@ -58,16 +60,16 @@ void free_project(Project **project) {
       }
     }
 
-    free((*project)->floors);
+    free(project->floors);
   }
 
-  if (*project != NULL)
-    free(*project);
+  if (project != NULL)
+    free(project);
 
-  *project = NULL;
+  project = NULL;
 }
 
-void print_project(Project *project) {
+void print_project() {
   // floor_count
   printf("floor_count: %d\n", project->floor_count);
 
@@ -83,8 +85,8 @@ void print_project(Project *project) {
     // floor->spots
     printf("    spot_count: %d\n", floor->spot_count);
     printf("    spots: [\n");
-    for (int j = 0; j < floor[i].spot_count; j++) {
-      Spot *spot = &floor[i].spots[j];
+    for (int j = 0; j < floor->spot_count; j++) {
+      Spot *spot = &floor->spots[j];
       printf("      spot %d: {\n", j);
 
       // spot->position
@@ -107,8 +109,8 @@ void print_project(Project *project) {
     // floor->roads
     printf("    road_count: %d\n", floor->road_count);
     printf("    roads: [\n");
-    for (int j = 0; j < floor[i].road_count; j++) {
-      Road *road = &floor[i].roads[j];
+    for (int j = 0; j < floor->road_count; j++) {
+      Road *road = &floor->roads[j];
       printf("      road %d: {\n", j);
 
       // road->position
@@ -125,19 +127,19 @@ void print_project(Project *project) {
     // floor->entrances
     printf("    entrance_count: %d\n", floor->entrance_count);
     printf("    entrances: [\n");
-    for (int j = 0; j < floor[i].entrance_count; j++) {
-      Vector2 *entrance = &floor[i].entrances[j];
+    for (int j = 0; j < floor->entrance_count; j++) {
+      Vector2 *entrance = &floor->entrances[j];
 
       // entrance->position
-      printf("      road %d: (%f, %f)\n", j, entrance->x, entrance->y);
+      printf("      entrance %d: (%f, %f)\n", j, entrance->x, entrance->y);
     }
     printf("    ]\n");
     printf("  }\n");
   }
-  printf("]");
+  printf("]\n");
 }
 
-void add_floor(Project *project) {
+void add_floor() {
   int new_floor_count = project->floor_count + 1;
   Floor *tmp_floors = realloc(project->floors, sizeof(Floor) * new_floor_count);
   if (tmp_floors == NULL)
@@ -149,7 +151,7 @@ void add_floor(Project *project) {
   project->active_floor = new_floor_count - 1;
 }
 
-void remove_floor(Project *project, int floor_index) {
+void remove_floor(int floor_index) {
   project->floor_count--;
 
   // Shift down elements after floor_index
@@ -170,7 +172,7 @@ void remove_floor(Project *project, int floor_index) {
 }
 
 bool get_save_file_path(nfdu8char_t **path) {
-  nfdu8filteritem_t filters[1] = {{"Project Files", "parking"}};
+  nfdu8filteritem_t filters[1] = {{"Project Files", "pproject"}};
   nfdsavedialogu8args_t args = {.filterList = filters, .filterCount = 1};
   nfdresult_t result = NFD_SaveDialogU8_With(path, &args);
 
@@ -189,7 +191,7 @@ bool get_save_file_path(nfdu8char_t **path) {
 }
 
 bool get_open_file_path(nfdu8char_t **path) {
-  nfdu8filteritem_t filters[1] = {{"Project Files", "parking"}};
+  nfdu8filteritem_t filters[1] = {{"Project Files", "pproject"}};
   nfdopendialogu8args_t args = {.filterList = filters, .filterCount = 1};
   nfdresult_t result = NFD_OpenDialogU8_With(path, &args);
 
@@ -207,21 +209,40 @@ bool get_open_file_path(nfdu8char_t **path) {
   return false;
 }
 
-void new_project(Project **project) {
+bool get_export_file_path(nfdu8char_t **path) {
+  nfdu8filteritem_t filters[1] = {{"Export Files", "pexport"}};
+  nfdopendialogu8args_t args = {.filterList = filters, .filterCount = 1};
+  nfdresult_t result = NFD_OpenDialogU8_With(path, &args);
+
+  switch (result) {
+  case NFD_OKAY:
+    printf("Path: %s\n", *path);
+    return true;
+  case NFD_CANCEL:
+    break;
+  default:
+    printf("Error: %s\n", NFD_GetError());
+    break;
+  }
+
+  return false;
+}
+
+void new_project() {
   nfdu8char_t *path;
   if (!get_save_file_path(&path))
     return;
 
-  free_project(project);
+  free_project();
 
-  (*project) = malloc(sizeof(Project));
-  init_project(*project);
-  (*project)->path = path;
+  project = malloc(sizeof(Project));
+  init_project();
+  project->path = path;
 
-  save_project(*project);
+  save_project();
 }
 
-void open_project(Project **project) {
+void open_project() {
   nfdu8char_t *path;
   if (!get_open_file_path(&path))
     return;
@@ -232,31 +253,31 @@ void open_project(Project **project) {
     return;
   }
 
-  free_project(project);
-  *project = malloc(sizeof(Project));
-  (*project)->path = path;
+  free_project();
+  project = malloc(sizeof(Project));
+  project->path = path;
 
   // Parsing file to project
   // Skipping labels and reading data
 
   // Read floor count
-  fscanf(file, "%*s %d", &(*project)->floor_count);
+  fscanf(file, "%*s %d", &project->floor_count);
 
   // Allocate floors array for the actual number of floors
-  (*project)->floors = calloc((*project)->floor_count, sizeof(Floor));
-  if ((*project)->floors == NULL) {
+  project->floors = calloc(project->floor_count, sizeof(Floor));
+  if (project->floors == NULL) {
     fclose(file);
-    free_project(project);
+    free_project();
     return;
   }
 
   // Read active floor
-  fscanf(file, "%*s %d", &(*project)->active_floor);
+  fscanf(file, "%*s %d", &project->active_floor);
 
   // Read floors
   fscanf(file, "%*s %*s"); // Skip "floors: ["
-  for (int i = 0; i < (*project)->floor_count; i++) {
-    Floor *floor = &(*project)->floors[i];
+  for (int i = 0; i < project->floor_count; i++) {
+    Floor *floor = &project->floors[i];
 
     fscanf(file, "%*s %*s %*s"); // Skip "floor n: {"
     // Read spot count
@@ -267,7 +288,7 @@ void open_project(Project **project) {
       floor->spots = malloc(sizeof(Spot) * floor->spot_count);
       if (floor->spots == NULL) {
         fclose(file);
-        free_project(project);
+        free_project();
         return;
       }
     } else {
@@ -303,7 +324,7 @@ void open_project(Project **project) {
       floor->roads = malloc(sizeof(Road) * floor->road_count);
       if (floor->roads == NULL) {
         fclose(file);
-        free_project(project);
+        free_project();
         return;
       }
     } else {
@@ -333,7 +354,7 @@ void open_project(Project **project) {
       floor->entrances = malloc(sizeof(Vector2) * floor->entrance_count);
       if (floor->entrances == NULL) {
         fclose(file);
-        free_project(project);
+        free_project();
         return;
       }
     } else {
@@ -349,14 +370,16 @@ void open_project(Project **project) {
       fscanf(file, "%f %*s %f %*s", &floor->entrances[j].x,
              &floor->entrances[j].y);
     }
+
+    fscanf(file, "%*s %*s");
   }
 
   fclose(file);
 
-  print_project(*project);
+  print_project();
 }
 
-void save_project(Project *project) {
+void save_project() {
   if (project == NULL) {
     printf("Save: Project is null...\n");
     return;
@@ -387,8 +410,8 @@ void save_project(Project *project) {
     // floor->spots
     fprintf(file, "    spot_count: %d\n", floor->spot_count);
     fprintf(file, "    spots: [\n");
-    for (int j = 0; j < floor[i].spot_count; j++) {
-      Spot *spot = &floor[i].spots[j];
+    for (int j = 0; j < floor->spot_count; j++) {
+      Spot *spot = &floor->spots[j];
       fprintf(file, "      spot %d: {\n", j);
 
       // spot->position
@@ -411,8 +434,8 @@ void save_project(Project *project) {
     // floor->roads
     fprintf(file, "    road_count: %d\n", floor->road_count);
     fprintf(file, "    roads: [\n");
-    for (int j = 0; j < floor[i].road_count; j++) {
-      Road *road = &floor[i].roads[j];
+    for (int j = 0; j < floor->road_count; j++) {
+      Road *road = &floor->roads[j];
       fprintf(file, "      road %d: {\n", j);
 
       // road->position
@@ -429,11 +452,12 @@ void save_project(Project *project) {
     // floor->entrances
     fprintf(file, "    entrance_count: %d\n", floor->entrance_count);
     fprintf(file, "    entrances: [\n");
-    for (int j = 0; j < floor[i].entrance_count; j++) {
-      Vector2 *entrance = &floor[i].entrances[j];
+    for (int j = 0; j < floor->entrance_count; j++) {
+      Vector2 *entrance = &floor->entrances[j];
 
       // entrance->position
-      fprintf(file, "      road %d: (%f, %f)\n", j, entrance->x, entrance->y);
+      fprintf(file, "      entrance %d: (%f, %f)\n", j, entrance->x,
+              entrance->y);
     }
     fprintf(file, "    ]\n");
     fprintf(file, "  }\n");
@@ -443,30 +467,78 @@ void save_project(Project *project) {
   fclose(file);
 
   printf("Saved project succesfully!\n");
-  print_project(project);
+  print_project();
 }
 
-void export_project(Project *project) {
+int spot_comp(const void *a, const void *b) {
+  Spot *a_spot = (Spot *)a;
+  Spot *b_spot = (Spot *)b;
+
+  Road **a_roads = get_surrounding_roads(a_spot->position);
+  Road **b_roads = get_surrounding_roads(b_spot->position);
+
+  int a_min = INT_MAX;
+  int b_min = INT_MAX;
+
+  for (int i = 0; i < 4; i++) {
+    Road *a_road = a_roads[i];
+    Road *b_road = b_roads[i];
+
+    bool a_lower =
+        a_road != NULL && a_road->distance != 0 && a_road->distance < a_min;
+    bool b_lower =
+        b_road != NULL && b_road->distance != 0 && b_road->distance < b_min;
+    if (a_lower)
+      a_min = a_road->distance;
+    if (b_lower)
+      b_min = b_road->distance;
+  }
+
+  free(a_roads);
+  free(b_roads);
+
+  return a_min - b_min;
+}
+
+void export_project() {
   if (project == NULL) {
     printf("Export: Project is null...\n");
     return;
   }
 
   nfdu8char_t *path;
-  if (!get_save_file_path(&path))
+  if (!get_export_file_path(&path))
     return;
 
+  FILE *file = fopen(path, "w");
   NFD_FreePathU8(path);
-  // TODO: Export project to path
+
+  if (file == NULL) {
+    printf("Error: Could not open file for writing\n");
+    return;
+  }
+
+  fprintf(file, "<FLOOR>,<ZONE>,<ID>,<TYPE>\n");
+  for (int i = 0; i < project->floor_count; i++) {
+    Floor *floor = &project->floors[i];
+    qsort(floor->spots, floor->spot_count, sizeof(Spot), spot_comp);
+
+    for (int j = 0; j < floor->spot_count; j++) {
+      Spot *spot = &floor->spots[j];
+      fprintf(file, "%d,%c,%d,%d\n", i, spot->zone, spot->id, spot->type);
+    }
+  }
+
+  fclose(file);
 }
 
-bool is_at(Project *project, Vector2 position) {
-  return is_spot_at(project, position) || is_road_at(project, position) ||
-         is_entrance_at(project, position);
+bool is_at(Vector2 position) {
+  return is_spot_at(position) || is_road_at(position) ||
+         is_entrance_at(position);
 }
 
 #pragma region Spot
-Spot *get_spot_at(Project *project, Vector2 position) {
+Spot *get_spot_at(Vector2 position) {
   Floor *active_floor = &project->floors[project->active_floor];
 
   for (int i = 0; i < active_floor->spot_count; i++) {
@@ -480,11 +552,9 @@ Spot *get_spot_at(Project *project, Vector2 position) {
   return NULL;
 }
 
-bool is_spot_at(Project *project, Vector2 position) {
-  return get_spot_at(project, position) != NULL;
-}
+bool is_spot_at(Vector2 position) { return get_spot_at(position) != NULL; }
 
-int get_spot_index(Project *project, Vector2 position) {
+int get_spot_index(Vector2 position) {
   Floor *active_floor = &project->floors[project->active_floor];
 
   for (int i = 0; i < active_floor->spot_count; i++) {
@@ -498,18 +568,18 @@ int get_spot_index(Project *project, Vector2 position) {
   return -1;
 }
 
-void add_spot(Project *project, Vector2 position, char zone) {
+void add_spot(Vector2 position, char zone) {
   if (project == NULL)
     return;
 
   Spot **spots = &project->floors[project->active_floor].spots;
   int *spot_count = &project->floors[project->active_floor].spot_count;
-  ++*spot_count;
 
-  Spot *tmp = realloc(*spots, sizeof(Spot) * *spot_count);
+  Spot *tmp = realloc(*spots, sizeof(Spot) * (*spot_count + 1));
   if (tmp == NULL)
     return;
 
+  ++*spot_count;
   *spots = tmp;
   Spot *new_spot = &(*spots)[*spot_count - 1];
   new_spot->position = position;
@@ -518,13 +588,13 @@ void add_spot(Project *project, Vector2 position, char zone) {
   new_spot->id = *spot_count;
 }
 
-void remove_spot(Project *project, Vector2 position) {
+void remove_spot(Vector2 position) {
   if (project == NULL)
     return;
 
   Spot **spots = &project->floors[project->active_floor].spots;
   int *spot_count = &project->floors[project->active_floor].spot_count;
-  int spot_index = get_spot_index(project, position);
+  int spot_index = get_spot_index(position);
   if (spot_index < 0)
     return;
 
@@ -561,7 +631,7 @@ void draw_spots(Project *project) {
 #pragma endregion
 
 #pragma region Roads
-Road *get_road_at(Project *project, Vector2 position) {
+Road *get_road_at(Vector2 position) {
   Floor *active_floor = &project->floors[project->active_floor];
 
   for (int i = 0; i < active_floor->road_count; i++) {
@@ -575,11 +645,9 @@ Road *get_road_at(Project *project, Vector2 position) {
   return NULL;
 }
 
-bool is_road_at(Project *project, Vector2 position) {
-  return get_road_at(project, position) != NULL;
-}
+bool is_road_at(Vector2 position) { return get_road_at(position) != NULL; }
 
-int get_road_index(Project *project, Vector2 position) {
+int get_road_index(Vector2 position) {
   Floor *active_floor = &project->floors[project->active_floor];
 
   for (int i = 0; i < active_floor->road_count; i++) {
@@ -593,21 +661,21 @@ int get_road_index(Project *project, Vector2 position) {
   return -1;
 }
 
-bool has_surrounding_entrance(Project *project, Vector2 position) {
+bool has_surrounding_entrance(Vector2 position) {
   Vector2 north_pos = (Vector2){position.x, position.y + GRID_SIZE};
   Vector2 south_pos = (Vector2){position.x, position.y - GRID_SIZE};
   Vector2 east_pos = (Vector2){position.x + GRID_SIZE, position.y};
   Vector2 west_pos = (Vector2){position.x - GRID_SIZE, position.y};
 
-  bool at_north = is_entrance_at(project, north_pos);
-  bool at_south = is_entrance_at(project, south_pos);
-  bool at_east = is_entrance_at(project, east_pos);
-  bool at_west = is_entrance_at(project, west_pos);
+  bool at_north = is_entrance_at(north_pos);
+  bool at_south = is_entrance_at(south_pos);
+  bool at_east = is_entrance_at(east_pos);
+  bool at_west = is_entrance_at(west_pos);
 
   return at_north || at_south || at_east || at_west;
 }
 
-Road **get_surrounding_roads(Project *project, Vector2 position) {
+Road **get_surrounding_roads(Vector2 position) {
   Vector2 north_pos = (Vector2){position.x, position.y + GRID_SIZE};
   Vector2 south_pos = (Vector2){position.x, position.y - GRID_SIZE};
   Vector2 east_pos = (Vector2){position.x + GRID_SIZE, position.y};
@@ -618,19 +686,19 @@ Road **get_surrounding_roads(Project *project, Vector2 position) {
   if (roads == NULL)
     return NULL;
 
-  roads[0] = get_road_at(project, north_pos);
-  roads[1] = get_road_at(project, south_pos);
-  roads[2] = get_road_at(project, east_pos);
-  roads[3] = get_road_at(project, west_pos);
+  roads[0] = get_road_at(north_pos);
+  roads[1] = get_road_at(south_pos);
+  roads[2] = get_road_at(east_pos);
+  roads[3] = get_road_at(west_pos);
 
   return roads;
 }
 
-int get_road_distance(Project *project, Vector2 position) {
-  if (has_surrounding_entrance(project, position))
+int get_road_distance(Vector2 position) {
+  if (has_surrounding_entrance(position))
     return 1;
 
-  Road **roads = get_surrounding_roads(project, position);
+  Road **roads = get_surrounding_roads(position);
   if (roads == NULL)
     return 0;
 
@@ -654,13 +722,13 @@ int get_road_distance(Project *project, Vector2 position) {
 }
 
 void update_road(Project *project, Road *road) {
-  int distance = get_road_distance(project, road->position);
+  int distance = get_road_distance(road->position);
   if (road->distance == distance)
     return;
 
   road->distance = distance;
 
-  Road **roads = get_surrounding_roads(project, road->position);
+  Road **roads = get_surrounding_roads(road->position);
   if (roads == NULL)
     return;
 
@@ -681,7 +749,7 @@ void reset_road(Project *project, Road *road) {
 
   road->distance = 0;
 
-  Road **roads = get_surrounding_roads(project, road->position);
+  Road **roads = get_surrounding_roads(road->position);
 
   for (int i = 0; i < 4; i++) {
     Road *neighbor = roads[i];
@@ -694,31 +762,31 @@ void reset_road(Project *project, Road *road) {
   free(roads);
 }
 
-void add_road(Project *project, Vector2 position) {
+void add_road(Vector2 position) {
   if (project == NULL)
     return;
 
   Road **roads = &project->floors[project->active_floor].roads;
   int *road_count = &project->floors[project->active_floor].road_count;
-  ++*road_count;
 
-  Road *tmp = realloc(*roads, sizeof(Road) * *road_count);
+  Road *tmp = realloc(*roads, sizeof(Road) * (*road_count + 1));
   if (tmp == NULL)
     return;
 
+  ++*road_count;
   *roads = tmp;
   Road *new_road = &(*roads)[*road_count - 1];
   new_road->position = position;
   update_road(project, new_road);
 }
 
-void remove_roads(Project *project, Vector2 position) {
+void remove_roads(Vector2 position) {
   if (project == NULL)
     return;
 
   Road **roads = &project->floors[project->active_floor].roads;
   int *road_count = &project->floors[project->active_floor].road_count;
-  int road_index = get_road_index(project, position);
+  int road_index = get_road_index(position);
   if (road_index < 0)
     return;
 
@@ -755,7 +823,7 @@ void draw_roads(Project *project) {
 #pragma endregion
 
 #pragma region Entrances
-Vector2 *get_entrance_at(Project *project, Vector2 position) {
+Vector2 *get_entrance_at(Vector2 position) {
   Floor *active_floor = &project->floors[project->active_floor];
 
   for (int i = 0; i < active_floor->entrance_count; i++) {
@@ -769,11 +837,11 @@ Vector2 *get_entrance_at(Project *project, Vector2 position) {
   return NULL;
 }
 
-bool is_entrance_at(Project *project, Vector2 position) {
-  return get_entrance_at(project, position) != NULL;
+bool is_entrance_at(Vector2 position) {
+  return get_entrance_at(position) != NULL;
 }
 
-int get_entrance_index(Project *project, Vector2 position) {
+int get_entrance_index(Vector2 position) {
   Floor *active_floor = &project->floors[project->active_floor];
 
   for (int i = 0; i < active_floor->entrance_count; i++) {
@@ -787,22 +855,22 @@ int get_entrance_index(Project *project, Vector2 position) {
   return -1;
 }
 
-void add_entrance(Project *project, Vector2 position) {
+void add_entrance(Vector2 position) {
   if (project == NULL)
     return;
 
   Vector2 **entrances = &project->floors[project->active_floor].entrances;
   int *entrance_count = &project->floors[project->active_floor].entrance_count;
-  ++*entrance_count;
 
-  Vector2 *tmp = realloc(*entrances, sizeof(Vector2) * *entrance_count);
+  Vector2 *tmp = realloc(*entrances, sizeof(Vector2) * (*entrance_count + 1));
   if (tmp == NULL)
     return;
 
+  ++*entrance_count;
   *entrances = tmp;
   (*entrances)[*entrance_count - 1] = position;
 
-  Road **roads = get_surrounding_roads(project, position);
+  Road **roads = get_surrounding_roads(position);
   if (roads == NULL)
     return;
 
@@ -817,13 +885,13 @@ void add_entrance(Project *project, Vector2 position) {
   free(roads);
 }
 
-void remove_entrance(Project *project, Vector2 position) {
+void remove_entrance(Vector2 position) {
   if (project == NULL)
     return;
 
   Vector2 **entrances = &project->floors[project->active_floor].entrances;
   int *entrance_count = &project->floors[project->active_floor].entrance_count;
-  int entrance_index = get_entrance_index(project, position);
+  int entrance_index = get_entrance_index(position);
   if (entrance_index < 0)
     return;
 
@@ -839,7 +907,7 @@ void remove_entrance(Project *project, Vector2 position) {
 
   *entrances = tmp;
 
-  Road **roads = get_surrounding_roads(project, position);
+  Road **roads = get_surrounding_roads(position);
   if (roads == NULL)
     return;
 
@@ -856,7 +924,7 @@ void remove_entrance(Project *project, Vector2 position) {
   for (int i = 0; i < *entrance_count; i++) {
     Vector2 *entrance = &(*entrances)[i];
 
-    Road **entrance_roads = get_surrounding_roads(project, *entrance);
+    Road **entrance_roads = get_surrounding_roads(*entrance);
     if (entrance_roads == NULL)
       continue;
 

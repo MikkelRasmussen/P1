@@ -13,7 +13,6 @@
 #include "raygui.h"
 
 int main(void) {
-  Project *project = NULL;
   int tool_index = 0;
 
   NFD_Init();
@@ -21,38 +20,39 @@ int main(void) {
   InitWindow(DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT, "Parking Manager");
   SetTargetFPS(60);
 
-  // char zones[] = {'A', 'B', 'C', 'D'};
-  // set_project_zones(project, zones, sizeof(zones) / sizeof(zones[0]));
-
   GuiLoadStyle("../style.rgs");
   GuiLoadIcons("../icons.rgi", false);
   set_window_icon();
 
   int render_width = DEFAULT_SCREEN_WIDTH - INSPECTOR_WIDTH;
-  int render_height = DEFAULT_SCREEN_HEIGHT - TAB_BAR_HEIGHT;
+  int render_height = DEFAULT_SCREEN_HEIGHT - TAB_BAR_HEIGHT - BUTTON_SIZE;
   RenderTexture camera_texture = LoadRenderTexture(render_width, render_height);
   Camera2D camera = init_camera(render_width, render_height);
-  Rectangle camera_rect = {0.0f, 0.0f, (float)render_width,
-                           (float)-render_height};
+  Rectangle camera_rect = (Rectangle){.x = 0,
+                                      .y = 0,
+                                      .width = (float)render_width,
+                                      .height = (float)-render_height};
 
   while (!WindowShouldClose()) {
+    Rectangle render_rect = (Rectangle){.x = 0,
+                                        .y = TAB_BAR_HEIGHT,
+                                        .width = render_width,
+                                        .height = render_height};
+
     // Update camera and screen size
     update_screen_size_change(&camera, &camera_texture, &camera_rect,
                               &render_width, &render_height);
-    update_camera(&camera, 0, TAB_BAR_HEIGHT, render_width, render_height);
+    update_camera(&camera, render_rect);
 
     // Handle inspect tool (drag camera)
-    handle_inspect_tool(&camera, render_width, render_height, tool_index);
+    handle_inspect_tool(&camera, tool_index, render_rect);
 
     // Handle parking tool (add parking spot on mouse click)
-    handle_spot_tool(project, &camera, tool_index, 0, TAB_BAR_HEIGHT,
-                     render_width, render_height);
-    handle_road_tool(project, &camera, tool_index, 0, TAB_BAR_HEIGHT,
-                     render_width, render_height);
-    handle_entrance_tool(project, &camera, tool_index, 0, TAB_BAR_HEIGHT,
-                         render_width, render_height);
+    handle_spot_tool(&camera, tool_index, render_rect);
+    handle_road_tool(&camera, tool_index, render_rect);
+    handle_entrance_tool(&camera, tool_index, render_rect);
 
-    handle_save(project);
+    handle_save();
 
     // --- Drawing to render texture ---
     BeginTextureMode(camera_texture);
@@ -65,8 +65,7 @@ int main(void) {
     draw_entrances(project);
 
     // Draw parking preview
-    draw_selection_preview(&camera, 0, TAB_BAR_HEIGHT, render_width,
-                           render_height);
+    draw_selection_preview(&camera, render_rect);
 
     EndMode2D();
     EndTextureMode();
@@ -78,16 +77,16 @@ int main(void) {
     // Draw Camera Texture
     if (project != NULL) {
       DrawTextureRec(camera_texture.texture, camera_rect,
-                     (Vector2){0, TAB_BAR_HEIGHT}, WHITE);
-      draw_floor_buttons(project);
-      draw_tool_bar(&tool_index, render_width);
+                     (Vector2){render_rect.x, render_rect.y}, WHITE);
+      draw_floor_buttons();
     } else {
       draw_centered_text(
           "No project open!", (SCREEN_WIDTH - INSPECTOR_WIDTH) / 2,
           (SCREEN_HEIGHT - TAB_BAR_HEIGHT) / 2 + TAB_BAR_HEIGHT, 20);
     }
 
-    draw_tab_bar(&project);
+    draw_tool_bar(&tool_index, render_width);
+    draw_tab_bar();
     draw_inspector(render_width);
 
     EndDrawing();
@@ -95,7 +94,7 @@ int main(void) {
 
   // --- Clean up ---
   UnloadRenderTexture(camera_texture);
-  free_project(&project);
+  free_project();
   CloseWindow();
 
   return 0;

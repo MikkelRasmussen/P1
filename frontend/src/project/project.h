@@ -34,38 +34,42 @@ typedef struct Project {
   int active_floor;
 } Project;
 
+extern Project *project;
+
 // Function declarations
-void init_project(Project *project);
+void init_project();
 void init_floor(Floor *floor);
-void free_project(Project **project);
-void add_floor(Project *project);
-void remove_floor(Project *project, int floor_index);
-void new_project(Project **project);
-void open_project(Project **project);
-void save_project(Project *project);
-void export_project(Project *project);
-void print_project(Project *project);
-bool is_at(Project *project, Vector2 position);
+void free_project();
+void add_floor();
+void remove_floor(int floor_index);
+void new_project();
+void open_project();
+void save_project();
+void export_project();
+void print_project();
+bool is_at(Vector2 position);
 
 // Parking spot
-Spot *get_spot_at(Project *project, Vector2 position);
-bool is_spot_at(Project *project, Vector2 position);
-int get_spot_index(Project *project, Vector2 position);
-void add_spot(Project *project, Vector2 position, char zone);
-void remove_spot(Project *project, Vector2 position);
+Spot *get_spot_at(Vector2 position);
+bool is_spot_at(Vector2 position);
+int spot_comp(const void *a, const void *b);
+int get_spot_index(Vector2 position);
+void add_spot(Vector2 position, char zone);
+void remove_spot(Vector2 position);
 void draw_spots(Project *project);
 
 // Roads
-Road *get_road_at(Project *project, Vector2 position);
-bool is_road_at(Project *project, Vector2 position);
-void add_road(Project *project, Vector2 position);
-void remove_roads(Project *project, Vector2 position);
+Road *get_road_at(Vector2 position);
+Road **get_surrounding_roads(Vector2 position);
+bool is_road_at(Vector2 position);
+void add_road(Vector2 position);
+void remove_roads(Vector2 position);
 void draw_roads(Project *project);
 
 // Entrances
-Vector2 *get_entrance_at(Project *project, Vector2 position);
-bool is_entrance_at(Project *project, Vector2 position);
-int get_entrance_index(Project *project, Vector2 position);
-void add_entrance(Project *project, Vector2 position);
-void remove_entrance(Project *project, Vector2 position);
+Vector2 *get_entrance_at(Vector2 position);
+bool is_entrance_at(Vector2 position);
+int get_entrance_index(Vector2 position);
+void add_entrance(Vector2 position);
+void remove_entrance(Vector2 position);
 void draw_entrances(Project *project);

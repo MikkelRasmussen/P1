@@ -13,7 +13,6 @@
 void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
                                Rectangle *camera_rect, int *render_width,
                                int *render_height) {
-
   if (!IsWindowResized())
     return;
 
@@ -55,7 +54,7 @@ void draw_grid() {
   rlPopMatrix();
 }
 
-void draw_tab_bar(Project **project) {
+void draw_tab_bar() {
   DrawRectangle(0, 0, SCREEN_WIDTH, TAB_BAR_HEIGHT, get_bg_color());
   GuiLine((Rectangle){0, TAB_BAR_HEIGHT, SCREEN_WIDTH, 1}, NULL);
 
@@ -94,8 +93,8 @@ void draw_tab_bar(Project **project) {
       EXPORT_ICON);
   GuiDisableTooltip();
 
-  if (*project != NULL) {
-    char *path_copy = strdup((*project)->path);
+  if (project != NULL) {
+    char *path_copy = strdup(project->path);
     if (path_copy == NULL)
       return;
 
@@ -119,21 +118,25 @@ void draw_tab_bar(Project **project) {
   }
 
   if (is_new_pressed)
-    new_project(project);
+    new_project();
 
   if (is_open_pressed)
-    open_project(project);
+    open_project();
 
   if (is_save_pressed)
-    save_project(*project);
+    save_project();
 
   if (is_export_pressed)
-    export_project(*project);
+    export_project();
 }
 
 void draw_tool_bar(int *tool_index, int render_width) {
-  GuiToggleGroup((Rectangle){.x = (float)render_width / 2 - 2 * BUTTON_SIZE -
-                                  1.5f * BUTTON_SPACING,
+  GuiLine((Rectangle){0, SCREEN_HEIGHT - BUTTON_SIZE,
+                      SCREEN_WIDTH - INSPECTOR_WIDTH, 1},
+          NULL);
+
+  GuiToggleGroup((Rectangle){.x = (float)render_width - 4 * BUTTON_SIZE -
+                                  3 * BUTTON_SPACING,
                              .y = SCREEN_HEIGHT - BUTTON_SIZE,
                              .width = BUTTON_SIZE,
                              .height = BUTTON_SIZE},
@@ -149,8 +152,8 @@ void draw_inspector(int render_width) {
            "Inspector");
 }
 
-void handle_inspect_tool(Camera2D *camera, int render_x, int render_y,
-                         int tool_index) {
+void handle_inspect_tool(Camera2D *camera, int tool_index,
+                         Rectangle render_rect) {
   if (tool_index != TOOL_INSPECT)
     return;
 
@@ -162,10 +165,10 @@ void handle_inspect_tool(Camera2D *camera, int render_x, int render_y,
   }
 }
 
-Vector2 get_mouse_grid_pos(const Camera2D *camera, int render_x, int render_y) {
+Vector2 get_mouse_grid_pos(const Camera2D *camera, Rectangle render_rect) {
   Vector2 mouse_screen_pos = GetMousePosition();
-  Vector2 mouse_render_pos =
-      (Vector2){mouse_screen_pos.x - render_x, mouse_screen_pos.y - render_y};
+  Vector2 mouse_render_pos = (Vector2){mouse_screen_pos.x - render_rect.x,
+                                       mouse_screen_pos.y - render_rect.y};
 
   Vector2 mouse_world_pos = GetScreenToWorld2D(mouse_render_pos, *camera);
 
@@ -174,23 +177,21 @@ Vector2 get_mouse_grid_pos(const Camera2D *camera, int render_x, int render_y) {
                    floor(mouse_world_pos.y / GRID_SIZE) * GRID_SIZE};
 }
 
-void handle_spot_tool(Project *project, const Camera2D *camera, int tool_index,
-                      int render_x, int render_y, int render_width,
-                      int render_height) {
+void handle_spot_tool(const Camera2D *camera, int tool_index,
+                      Rectangle render_rect) {
   bool should_place =
       tool_index == TOOL_PARKING && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   if (!should_place)
     return;
 
-  bool is_outside_renderer =
-      get_is_outside_renderer(render_x, render_y, render_width, render_height);
+  bool is_outside_renderer = get_is_outside_renderer(render_rect);
 
-  Vector2 grid_pos = get_mouse_grid_pos(camera, render_x, render_y);
-  bool grid_pos_taken = is_at(project, grid_pos);
-  bool is_spot = is_spot_at(project, grid_pos);
+  Vector2 grid_pos = get_mouse_grid_pos(camera, render_rect);
+  bool grid_pos_taken = is_at(grid_pos);
+  bool is_spot = is_spot_at(grid_pos);
 
   if (is_spot) {
-    remove_spot(project, grid_pos);
+    remove_spot(grid_pos);
     return;
   } else if (grid_pos_taken)
     return;
@@ -199,79 +200,74 @@ void handle_spot_tool(Project *project, const Camera2D *camera, int tool_index,
     return;
 
   // Assign first zone by default
-  add_spot(project, grid_pos, 'A');
+  add_spot(grid_pos, 'A');
 }
 
-void handle_road_tool(Project *project, const Camera2D *camera, int tool_index,
-                      int render_x, int render_y, int render_width,
-                      int render_height) {
+void handle_road_tool(const Camera2D *camera, int tool_index,
+                      Rectangle render_rect) {
   bool should_place =
       tool_index == TOOL_ROAD && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   if (!should_place)
     return;
 
-  bool is_outside_renderer =
-      get_is_outside_renderer(render_x, render_y, render_width, render_height);
+  bool is_outside_renderer = get_is_outside_renderer(render_rect);
   if (is_outside_renderer)
     return;
 
-  Vector2 grid_pos = get_mouse_grid_pos(camera, render_x, render_y);
-  bool grid_pos_taken = is_at(project, grid_pos);
-  bool is_road = is_road_at(project, grid_pos);
+  Vector2 grid_pos = get_mouse_grid_pos(camera, render_rect);
+  bool grid_pos_taken = is_at(grid_pos);
+  bool is_road = is_road_at(grid_pos);
 
   if (is_road) {
-    remove_roads(project, grid_pos);
+    remove_roads(grid_pos);
     return;
   } else if (grid_pos_taken)
     return;
 
   // Assign first zone by default
-  add_road(project, grid_pos);
+  add_road(grid_pos);
 }
 
-void handle_entrance_tool(Project *project, const Camera2D *camera,
-                          int tool_index, int render_x, int render_y,
-                          int render_width, int render_height) {
+void handle_entrance_tool(const Camera2D *camera, int tool_index,
+                          Rectangle render_rect) {
   bool should_place =
       tool_index == TOOL_ENTRANCE && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   if (!should_place)
     return;
 
-  bool is_outside_renderer =
-      get_is_outside_renderer(render_x, render_y, render_width, render_height);
+  bool is_outside_renderer = get_is_outside_renderer(render_rect);
   if (is_outside_renderer)
     return;
 
-  Vector2 grid_pos = get_mouse_grid_pos(camera, render_x, render_y);
-  bool grid_pos_taken = is_at(project, grid_pos);
-  bool is_entrance = is_entrance_at(project, grid_pos);
+  Vector2 grid_pos = get_mouse_grid_pos(camera, render_rect);
+  bool grid_pos_taken = is_at(grid_pos);
+  bool is_entrance = is_entrance_at(grid_pos);
 
   if (is_entrance) {
-    remove_entrance(project, grid_pos);
+    remove_entrance(grid_pos);
     return;
   } else if (grid_pos_taken)
     return;
 
   // Assign first zone by default
-  add_entrance(project, grid_pos);
+  add_entrance(grid_pos);
 }
 
 int deleting_floor_index = -1;
-void draw_floor_buttons(Project *project) {
-  if (project == NULL)
-    return;
-
+void draw_floor_buttons() {
   if (deleting_floor_index != -1) {
-    int message_result =
-        GuiMessageBox((Rectangle){(float)SCREEN_WIDTH / 2 - 125,
-                                  (float)SCREEN_HEIGHT / 2 - 50, 250, 100},
-                      "#191#Delete Floor",
-                      TextFormat("Are you sure you want to delete floor %d?",
-                                 deleting_floor_index + 1),
-                      "Confirm;Cancel");
+    int message_result = GuiMessageBox(
+        (Rectangle){(float)(SCREEN_WIDTH - INSPECTOR_WIDTH) / 2 - 125,
+                    (float)(SCREEN_HEIGHT - TAB_BAR_HEIGHT - BUTTON_SIZE) / 2 +
+                        TAB_BAR_HEIGHT - 50,
+                    250, 100},
+        "#191#Delete Floor",
+        TextFormat("Are you sure you want to delete floor %d?",
+                   deleting_floor_index + 1),
+        "Confirm;Cancel");
     if (message_result != -1) {
       if (message_result == 1)
-        remove_floor(project, deleting_floor_index);
+        remove_floor(deleting_floor_index);
 
       deleting_floor_index = -1;
     }
@@ -279,15 +275,16 @@ void draw_floor_buttons(Project *project) {
 
   // Calculate the button container total height and the y-coord of the
   // container
-  int total_height = (project->floor_count + 1) * (BUTTON_SIZE) +
-                     BUTTON_SPACING * project->floor_count;
-  int base_y =
-      ((SCREEN_HEIGHT - TAB_BAR_HEIGHT) - total_height) / 2 + TAB_BAR_HEIGHT;
+  int total_width = (project->floor_count + 1) * BUTTON_SIZE +
+                    BUTTON_SPACING * project->floor_count;
+  // int base_y =
+  //     ((SCREEN_HEIGHT - TAB_BAR_HEIGHT) - total_width) / 2 + TAB_BAR_HEIGHT;
 
   // Draw floor buttons
   for (int i = 0; i < project->floor_count; i++) {
-    int y = base_y + (BUTTON_SIZE + BUTTON_SPACING) * i;
-    Rectangle btn_rect = (Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE};
+    int x = (BUTTON_SIZE + BUTTON_SPACING) * i;
+    Rectangle btn_rect =
+        (Rectangle){x, SCREEN_HEIGHT - BUTTON_SIZE, BUTTON_SIZE, BUTTON_SIZE};
     int is_pressed = GuiButton(btn_rect, TextFormat("%d", i + 1));
     int was_right_clicked =
         IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) &&
@@ -305,33 +302,34 @@ void draw_floor_buttons(Project *project) {
   }
 
   // Draw add floor button
-  int y = base_y + (BUTTON_SIZE + BUTTON_SPACING) * project->floor_count;
-  int should_add_floor =
-      GuiButton((Rectangle){0, y, BUTTON_SIZE, BUTTON_SIZE}, "+");
+  int x = (BUTTON_SIZE + BUTTON_SPACING) * project->floor_count;
+  int should_add_floor = GuiButton(
+      (Rectangle){x, SCREEN_HEIGHT - BUTTON_SIZE, BUTTON_SIZE, BUTTON_SIZE},
+      "+");
 
   // Add floor, if button was pressed
   if (should_add_floor)
-    add_floor(project);
+    add_floor();
 }
 
-void handle_save(Project *project) {
+void handle_save() {
   if (!IsKeyDown(KEY_LEFT_CONTROL))
     return;
   if (!IsKeyPressed(KEY_S))
     return;
 
-  save_project(project);
+  save_project();
 }
 
-void draw_selection_preview(Camera2D *camera, int render_x, int render_y,
-                            int render_width, int render_height) {
+void draw_selection_preview(Camera2D *camera, Rectangle render_rect) {
   Vector2 mouse = GetMousePosition();
-  Rectangle renderArea = {render_x, render_y, render_width, render_height};
+  Rectangle renderArea = {render_rect.x, render_rect.y, render_rect.width,
+                          render_rect.height};
 
   if (!CheckCollisionPointRec(mouse, renderArea))
     return;
 
-  Vector2 local = {mouse.x - render_x, mouse.y - render_y};
+  Vector2 local = {mouse.x - render_rect.x, mouse.y - render_rect.y};
 
   Vector2 world = GetScreenToWorld2D(local, *camera);
 
