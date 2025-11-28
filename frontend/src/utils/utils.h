@@ -45,3 +45,4 @@ void handle_entrance_tool(Project *project, const Camera2D *camera,
                           int tool_index, int render_x, int render_y,
                           int render_width, int render_height);
 void handle_save(Project *project);
+bool vector2_equal(Vector2 v1, Vector2 v2);

@@ -50,9 +50,10 @@ bool is_at(Project *project, Vector2 position);
 // Parking spot
 Spot *get_spot_at(Project *project, Vector2 position);
 bool is_spot_at(Project *project, Vector2 position);
-void add_parking_spot(Project *project, Vector2 position, char zone);
-void remove_parking_spot(Project *project, Vector2 position);
-void draw_parking_spots(Project *project);
+int get_spot_index(Project *project, Vector2 position);
+void add_spot(Project *project, Vector2 position, char zone);
+void remove_spot(Project *project, Vector2 position);
+void draw_spots(Project *project);
 
 // Roads
 Road *get_road_at(Project *project, Vector2 position);
@@ -64,6 +65,7 @@ void draw_roads(Project *project);
 // Entrances
 Vector2 *get_entrance_at(Project *project, Vector2 position);
 bool is_entrance_at(Project *project, Vector2 position);
+int get_entrance_index(Project *project, Vector2 position);
 void add_entrance(Project *project, Vector2 position);
 void remove_entrance(Project *project, Vector2 position);
 void draw_entrances(Project *project);

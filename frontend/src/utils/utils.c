@@ -190,7 +190,7 @@ void handle_spot_tool(Project *project, const Camera2D *camera, int tool_index,
   bool is_spot = is_spot_at(project, grid_pos);
 
   if (is_spot) {
-    remove_parking_spot(project, grid_pos);
+    remove_spot(project, grid_pos);
     return;
   } else if (grid_pos_taken)
     return;
@@ -199,7 +199,7 @@ void handle_spot_tool(Project *project, const Camera2D *camera, int tool_index,
     return;
 
   // Assign first zone by default
-  add_parking_spot(project, grid_pos, 'A');
+  add_spot(project, grid_pos, 'A');
 }
 
 void handle_road_tool(Project *project, const Camera2D *camera, int tool_index,
@@ -340,4 +340,8 @@ void draw_selection_preview(Camera2D *camera, int render_x, int render_y,
 
   DrawRectangleLines(snapped.x, snapped.y, GRID_SIZE, GRID_SIZE * 1.0f,
                      ColorAlpha(WHITE, 1.0f));
+}
+
+bool vector2_equal(Vector2 v1, Vector2 v2) {
+  return v1.x == v2.x && v1.y == v2.y;
 }
