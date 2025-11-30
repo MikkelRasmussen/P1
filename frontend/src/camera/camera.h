@@ -1,12 +1,14 @@
 #pragma once
 #include "raylib.h"
 
-Camera2D init_camera(int render_width, int render_height);
+extern Camera2D camera;
+
+void init_camera(int render_width, int render_height);
 
 /**
  * Updates the camera drag and zoom logic
  */
-void update_camera(Camera2D *camera, Rectangle render_rect);
+void update_camera(Rectangle render_rect);
 
 int get_is_outside_renderer(Rectangle render_rect);
 

@@ -2,19 +2,21 @@
 #include "raymath.h"
 #include <raylib.h>
 
-Camera2D init_camera(int render_width, int render_height) {
-  return (Camera2D){.offset = {render_width / 2.0f, render_height / 2.0f},
-                    .target = {0, 0},
-                    .rotation = 0.0f,
-                    .zoom = 1.0f};
+Camera2D camera = {};
+
+void init_camera(int render_width, int render_height) {
+  camera = (Camera2D){.offset = {render_width / 2.0f, render_height / 2.0f},
+                      .target = {0, 0},
+                      .rotation = 0.0f,
+                      .zoom = 1.0f};
 }
 
-void update_camera(Camera2D *camera, Rectangle render_rect) {
+void update_camera(Rectangle render_rect) {
   if (get_is_outside_renderer(render_rect))
     return;
 
-  update_camera_zoom(camera, render_rect.x, render_rect.y);
-  update_camera_drag(camera);
+  update_camera_zoom(&camera, render_rect.x, render_rect.y);
+  update_camera_drag(&camera);
 }
 
 int get_is_outside_renderer(Rectangle render_rect) {

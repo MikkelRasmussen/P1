@@ -2,6 +2,7 @@
 #include "definitions.h"
 #include "project/project.h"
 #include "raylib.h"
+#include "selection/selection.h"
 #include "utils/utils.h"
 #include <math.h>
 #include <nfd.h>
@@ -26,8 +27,8 @@ int main(void) {
 
   int render_width = DEFAULT_SCREEN_WIDTH - INSPECTOR_WIDTH;
   int render_height = DEFAULT_SCREEN_HEIGHT - TAB_BAR_HEIGHT - BUTTON_SIZE;
+  init_camera(render_width, render_height);
   RenderTexture camera_texture = LoadRenderTexture(render_width, render_height);
-  Camera2D camera = init_camera(render_width, render_height);
   Rectangle camera_rect = (Rectangle){.x = 0,
                                       .y = 0,
                                       .width = (float)render_width,
@@ -40,17 +41,19 @@ int main(void) {
                                         .height = render_height};
 
     // Update camera and screen size
-    update_screen_size_change(&camera, &camera_texture, &camera_rect,
-                              &render_width, &render_height);
-    update_camera(&camera, render_rect);
+    update_screen_size_change(&camera_texture, &camera_rect, &render_width,
+                              &render_height);
+    update_camera(render_rect);
+
+    update_selection(render_rect);
 
     // Handle inspect tool (drag camera)
-    handle_inspect_tool(&camera, tool_index, render_rect);
+    handle_inspect_tool(tool_index, render_rect);
 
     // Handle parking tool (add parking spot on mouse click)
-    handle_spot_tool(&camera, tool_index, render_rect);
-    handle_road_tool(&camera, tool_index, render_rect);
-    handle_entrance_tool(&camera, tool_index, render_rect);
+    handle_spot_tool(tool_index, render_rect);
+    handle_road_tool(tool_index, render_rect);
+    handle_entrance_tool(tool_index, render_rect);
 
     handle_save();
 
@@ -65,7 +68,8 @@ int main(void) {
     draw_entrances(project);
 
     // Draw parking preview
-    draw_selection_preview(&camera, render_rect);
+    draw_selection_preview(render_rect);
+    draw_selection(render_rect);
 
     EndMode2D();
     EndTextureMode();

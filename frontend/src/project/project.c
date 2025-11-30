@@ -518,14 +518,17 @@ void export_project() {
     return;
   }
 
-  fprintf(file, "<FLOOR>,<ZONE>,<ID>,<TYPE>\n");
+  fprintf(file, "<INDEX>,<FLOOR>,<ZONE>,<ID>,<TYPE>\n");
+  int count = 1;
   for (int i = 0; i < project->floor_count; i++) {
     Floor *floor = &project->floors[i];
     qsort(floor->spots, floor->spot_count, sizeof(Spot), spot_comp);
 
     for (int j = 0; j < floor->spot_count; j++) {
       Spot *spot = &floor->spots[j];
-      fprintf(file, "%d,%c,%d,%d\n", i, spot->zone, spot->id, spot->type);
+      fprintf(file, "%d,%d,%c,%d,%d\n", count, i, spot->zone, spot->id,
+              spot->type);
+      count++;
     }
   }
 

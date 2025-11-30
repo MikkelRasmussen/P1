@@ -2,6 +2,7 @@
 #include "../camera/camera.h"
 #include "../definitions.h"
 #include "../project/project.h"
+#include "../selection/selection.h"
 #include "rlgl.h"
 #include <math.h>
 #include <raylib.h>
@@ -10,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
+void update_screen_size_change(RenderTexture *camera_texture,
                                Rectangle *camera_rect, int *render_width,
                                int *render_height) {
   if (!IsWindowResized())
@@ -19,7 +20,7 @@ void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
   int old_render_width = *render_width;
   int old_render_height = *render_height;
   *render_width = SCREEN_WIDTH - INSPECTOR_WIDTH;
-  *render_height = SCREEN_HEIGHT - TAB_BAR_HEIGHT;
+  *render_height = SCREEN_HEIGHT - TAB_BAR_HEIGHT - BUTTON_SIZE;
 
   UnloadRenderTexture(*camera_texture);
 
@@ -27,7 +28,7 @@ void update_screen_size_change(Camera2D *camera, RenderTexture *camera_texture,
   *camera_rect =
       (Rectangle){0.0f, 0.0f, (float)*render_width, (float)-*render_height};
 
-  update_camera_offset(camera, old_render_width, old_render_height,
+  update_camera_offset(&camera, old_render_width, old_render_height,
                        *render_width, *render_height);
 }
 
@@ -145,40 +146,109 @@ void draw_tool_bar(int *tool_index, int render_width) {
                  tool_index);
 }
 
+static bool zone_edit = false;
+static bool id_edit = false;
+void draw_spot_inspector(int render_width) {
+  Spot *spot = (Spot *)selection.ptr;
+
+  // Convert spot->id (int) to string
+  char new_zone = spot->zone;
+  int new_id = spot->id;
+  char zone_str[16] = "";
+  char id_str[16] = "";
+
+  sprintf(zone_str, "%c", new_zone);
+  if (spot->id >= 0)
+    sprintf(id_str, "%d", new_id);
+  int half_width = (float)(INSPECTOR_WIDTH - 24) / 2;
+
+  // Zone & ID
+  GuiLabel((Rectangle){render_width + 8, TAB_BAR_HEIGHT + 24,
+                       INSPECTOR_WIDTH - 16, 32},
+           "Zone & ID");
+
+  Rectangle zone_rect = (Rectangle){
+      render_width + 8, TAB_BAR_HEIGHT + 24 + 8 + 18, half_width, 32};
+  Rectangle id_rect = (Rectangle){render_width + half_width + 16,
+                                  TAB_BAR_HEIGHT + 24 + 8 + 18, half_width, 32};
+
+  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    Vector2 mouse_pos = GetMousePosition();
+    bool is_inside_zone = CheckCollisionPointRec(mouse_pos, zone_rect);
+    bool is_inside_id = CheckCollisionPointRec(mouse_pos, id_rect);
+
+    if (is_inside_zone) {
+      zone_edit = true;
+      id_edit = false;
+    } else if (is_inside_id) {
+      zone_edit = false;
+      id_edit = true;
+    } else {
+      zone_edit = false;
+      id_edit = false;
+    }
+  }
+
+  GuiTextBox(zone_rect, zone_str, sizeof(zone_str), zone_edit);
+  GuiTextBox(id_rect, id_str, sizeof(id_str), id_edit);
+
+  if (sscanf(zone_str, "%c", &new_zone) == 1) {
+    spot->zone = new_zone;
+  }
+
+  if (sscanf(id_str, "%d", &new_id) == 1) {
+    spot->id = new_id;
+  }
+
+  // Type
+  GuiLabel((Rectangle){render_width + 8, TAB_BAR_HEIGHT + 24 + 48 + 18,
+                       INSPECTOR_WIDTH - 16, 32},
+           "Type");
+  int type_index = (int)spot->type;
+  GuiToggleGroup(
+      (Rectangle){render_width + 8, TAB_BAR_HEIGHT + 24 + 48 + 44,
+                  (float)(INSPECTOR_WIDTH - 16 - BUTTON_SPACING * 1.5) / 3, 48},
+      "Default;Handicap;Electric", &type_index);
+  spot->type = (SpotType)type_index;
+}
+
 void draw_inspector(int render_width) {
   GuiPanel((Rectangle){render_width, TAB_BAR_HEIGHT,
                        SCREEN_WIDTH - render_width,
                        SCREEN_HEIGHT - TAB_BAR_HEIGHT},
            "Inspector");
+
+  if (selection.type != SPOT)
+    return;
+
+  draw_spot_inspector(render_width);
 }
 
-void handle_inspect_tool(Camera2D *camera, int tool_index,
-                         Rectangle render_rect) {
+void handle_inspect_tool(int tool_index, Rectangle render_rect) {
   if (tool_index != TOOL_INSPECT)
     return;
 
   // Dragging the camera
   if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
     Vector2 delta = GetMouseDelta();
-    camera->offset.x += delta.x;
-    camera->offset.y += delta.y;
+    camera.offset.x += delta.x;
+    camera.offset.y += delta.y;
   }
 }
 
-Vector2 get_mouse_grid_pos(const Camera2D *camera, Rectangle render_rect) {
+Vector2 get_mouse_grid_pos(Rectangle render_rect) {
   Vector2 mouse_screen_pos = GetMousePosition();
   Vector2 mouse_render_pos = (Vector2){mouse_screen_pos.x - render_rect.x,
                                        mouse_screen_pos.y - render_rect.y};
 
-  Vector2 mouse_world_pos = GetScreenToWorld2D(mouse_render_pos, *camera);
+  Vector2 mouse_world_pos = GetScreenToWorld2D(mouse_render_pos, camera);
 
   // Snap to grid
   return (Vector2){floor(mouse_world_pos.x / GRID_SIZE) * GRID_SIZE,
                    floor(mouse_world_pos.y / GRID_SIZE) * GRID_SIZE};
 }
 
-void handle_spot_tool(const Camera2D *camera, int tool_index,
-                      Rectangle render_rect) {
+void handle_spot_tool(int tool_index, Rectangle render_rect) {
   bool should_place =
       tool_index == TOOL_PARKING && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   if (!should_place)
@@ -186,7 +256,7 @@ void handle_spot_tool(const Camera2D *camera, int tool_index,
 
   bool is_outside_renderer = get_is_outside_renderer(render_rect);
 
-  Vector2 grid_pos = get_mouse_grid_pos(camera, render_rect);
+  Vector2 grid_pos = get_mouse_grid_pos(render_rect);
   bool grid_pos_taken = is_at(grid_pos);
   bool is_spot = is_spot_at(grid_pos);
 
@@ -203,8 +273,7 @@ void handle_spot_tool(const Camera2D *camera, int tool_index,
   add_spot(grid_pos, 'A');
 }
 
-void handle_road_tool(const Camera2D *camera, int tool_index,
-                      Rectangle render_rect) {
+void handle_road_tool(int tool_index, Rectangle render_rect) {
   bool should_place =
       tool_index == TOOL_ROAD && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   if (!should_place)
@@ -214,7 +283,7 @@ void handle_road_tool(const Camera2D *camera, int tool_index,
   if (is_outside_renderer)
     return;
 
-  Vector2 grid_pos = get_mouse_grid_pos(camera, render_rect);
+  Vector2 grid_pos = get_mouse_grid_pos(render_rect);
   bool grid_pos_taken = is_at(grid_pos);
   bool is_road = is_road_at(grid_pos);
 
@@ -228,8 +297,7 @@ void handle_road_tool(const Camera2D *camera, int tool_index,
   add_road(grid_pos);
 }
 
-void handle_entrance_tool(const Camera2D *camera, int tool_index,
-                          Rectangle render_rect) {
+void handle_entrance_tool(int tool_index, Rectangle render_rect) {
   bool should_place =
       tool_index == TOOL_ENTRANCE && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   if (!should_place)
@@ -239,7 +307,7 @@ void handle_entrance_tool(const Camera2D *camera, int tool_index,
   if (is_outside_renderer)
     return;
 
-  Vector2 grid_pos = get_mouse_grid_pos(camera, render_rect);
+  Vector2 grid_pos = get_mouse_grid_pos(render_rect);
   bool grid_pos_taken = is_at(grid_pos);
   bool is_entrance = is_entrance_at(grid_pos);
 
@@ -321,7 +389,7 @@ void handle_save() {
   save_project();
 }
 
-void draw_selection_preview(Camera2D *camera, Rectangle render_rect) {
+void draw_selection_preview(Rectangle render_rect) {
   Vector2 mouse = GetMousePosition();
   Rectangle renderArea = {render_rect.x, render_rect.y, render_rect.width,
                           render_rect.height};
@@ -331,7 +399,7 @@ void draw_selection_preview(Camera2D *camera, Rectangle render_rect) {
 
   Vector2 local = {mouse.x - render_rect.x, mouse.y - render_rect.y};
 
-  Vector2 world = GetScreenToWorld2D(local, *camera);
+  Vector2 world = GetScreenToWorld2D(local, camera);
 
   Vector2 snapped = {floorf(world.x / GRID_SIZE) * GRID_SIZE,
                      floorf(world.y / GRID_SIZE) * GRID_SIZE};

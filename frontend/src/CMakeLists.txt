@@ -17,6 +17,7 @@ add_executable(main
 add_subdirectory(utils)
 add_subdirectory(project)
 add_subdirectory(camera)
+add_subdirectory(selection)
 
 # Link libraries to main
 target_link_libraries(main
@@ -27,4 +28,5 @@ target_link_libraries(main
         utils
         project
         camera
+        selection
 )
