@@ -62,10 +62,10 @@ int main(void) {
     ClearBackground(get_bg_color());
     BeginMode2D(camera);
 
-    draw_grid();         // draw background grid
-    draw_spots(project); // draw all parking spots
-    draw_roads(project);
-    draw_entrances(project);
+    draw_grid();  // draw background grid
+    draw_spots(); // draw all parking spots
+    draw_roads();
+    draw_entrances();
 
     // Draw parking preview
     draw_selection_preview(render_rect);

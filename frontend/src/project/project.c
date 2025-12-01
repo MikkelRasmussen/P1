@@ -617,7 +617,7 @@ void remove_spot(Vector2 position) {
   *spots = tmp;
 }
 
-void draw_spots(Project *project) {
+void draw_spots() {
   if (project == NULL)
     return;
 
@@ -724,7 +724,7 @@ int get_road_distance(Vector2 position) {
   return min_distance == INT_MAX ? 0 : min_distance + 1;
 }
 
-void update_road(Project *project, Road *road) {
+void update_road(Road *road) {
   int distance = get_road_distance(road->position);
   if (road->distance == distance)
     return;
@@ -740,26 +740,28 @@ void update_road(Project *project, Road *road) {
     if (neighbor == NULL)
       continue;
 
-    update_road(project, neighbor);
+    update_road(neighbor);
   }
 
   free(roads);
 }
 
-void reset_road(Project *project, Road *road) {
+void reset_road(Road *road) {
   if (road->distance == 0)
     return;
 
   road->distance = 0;
 
   Road **roads = get_surrounding_roads(road->position);
+  if (roads == NULL)
+    return;
 
   for (int i = 0; i < 4; i++) {
     Road *neighbor = roads[i];
     if (neighbor == NULL)
       continue;
 
-    reset_road(project, neighbor);
+    reset_road(neighbor);
   }
 
   free(roads);
@@ -780,7 +782,7 @@ void add_road(Vector2 position) {
   *roads = tmp;
   Road *new_road = &(*roads)[*road_count - 1];
   new_road->position = position;
-  update_road(project, new_road);
+  update_road(new_road);
 }
 
 void remove_roads(Vector2 position) {
@@ -809,7 +811,7 @@ void remove_roads(Vector2 position) {
   *roads = tmp;
 }
 
-void draw_roads(Project *project) {
+void draw_roads() {
   if (project == NULL)
     return;
 
@@ -882,7 +884,7 @@ void add_entrance(Vector2 position) {
     if (road == NULL)
       continue;
 
-    update_road(project, road);
+    update_road(road);
   }
 
   free(roads);
@@ -919,7 +921,7 @@ void remove_entrance(Vector2 position) {
     if (neighbor == NULL)
       continue;
 
-    reset_road(project, neighbor);
+    reset_road(neighbor);
   }
 
   free(roads);
@@ -936,14 +938,14 @@ void remove_entrance(Vector2 position) {
       if (road == NULL)
         continue;
 
-      update_road(project, road);
+      update_road(road);
     }
 
     free(entrance_roads);
   }
 }
 
-void draw_entrances(Project *project) {
+void draw_entrances() {
   if (project == NULL)
     return;
 

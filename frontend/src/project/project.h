@@ -56,7 +56,7 @@ int spot_comp(const void *a, const void *b);
 int get_spot_index(Vector2 position);
 void add_spot(Vector2 position, char zone);
 void remove_spot(Vector2 position);
-void draw_spots(Project *project);
+void draw_spots();
 
 // Roads
 Road *get_road_at(Vector2 position);
@@ -64,7 +64,7 @@ Road **get_surrounding_roads(Vector2 position);
 bool is_road_at(Vector2 position);
 void add_road(Vector2 position);
 void remove_roads(Vector2 position);
-void draw_roads(Project *project);
+void draw_roads();
 
 // Entrances
 Vector2 *get_entrance_at(Vector2 position);
@@ -72,4 +72,4 @@ bool is_entrance_at(Vector2 position);
 int get_entrance_index(Vector2 position);
 void add_entrance(Vector2 position);
 void remove_entrance(Vector2 position);
-void draw_entrances(Project *project);
+void draw_entrances();
