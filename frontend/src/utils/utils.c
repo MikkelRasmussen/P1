@@ -13,7 +13,8 @@
 
 void update_screen_size_change(RenderTexture *camera_texture,
                                Rectangle *camera_rect, int *render_width,
-                               int *render_height) {
+                               int *render_height)
+{
   if (!IsWindowResized())
     return;
 
@@ -32,7 +33,8 @@ void update_screen_size_change(RenderTexture *camera_texture,
                        *render_width, *render_height);
 }
 
-void draw_centered_text(const char *text, int x, int y, int font_size) {
+void draw_centered_text(const char *text, int x, int y, int font_size)
+{
   float spacing = 2.0f;
   Vector2 text_size = MeasureTextEx(GetFontDefault(), text, font_size, spacing);
   int centered_x = x - (int)(text_size.x * 0.5f);
@@ -41,13 +43,15 @@ void draw_centered_text(const char *text, int x, int y, int font_size) {
              font_size, spacing, LIGHTGRAY);
 }
 
-void set_window_icon() {
+void set_window_icon()
+{
   Image icon = LoadImage("../icon.png");
   SetWindowIcon(icon);
   UnloadImage(icon);
 }
 
-void draw_grid() {
+void draw_grid()
+{
   rlPushMatrix();
   rlTranslatef(0, 25 * 250, 0);
   rlRotatef(90, 1, 0, 0);
@@ -55,7 +59,8 @@ void draw_grid() {
   rlPopMatrix();
 }
 
-void draw_tab_bar() {
+void draw_tab_bar()
+{
   DrawRectangle(0, 0, SCREEN_WIDTH, TAB_BAR_HEIGHT, get_bg_color());
   GuiLine((Rectangle){0, TAB_BAR_HEIGHT, SCREEN_WIDTH, 1}, NULL);
 
@@ -94,7 +99,8 @@ void draw_tab_bar() {
       EXPORT_ICON);
   GuiDisableTooltip();
 
-  if (project != NULL) {
+  if (project != NULL)
+  {
     char *path_copy = strdup(project->path);
     if (path_copy == NULL)
       return;
@@ -131,7 +137,8 @@ void draw_tab_bar() {
     export_project();
 }
 
-void draw_tool_bar(int *tool_index, int render_width) {
+void draw_tool_bar(int *tool_index, int render_width)
+{
   GuiLine((Rectangle){0, SCREEN_HEIGHT - BUTTON_SIZE,
                       SCREEN_WIDTH - INSPECTOR_WIDTH, 1},
           NULL);
@@ -148,7 +155,8 @@ void draw_tool_bar(int *tool_index, int render_width) {
 
 static bool zone_edit = false;
 static bool id_edit = false;
-void draw_spot_inspector(int render_width) {
+void draw_spot_inspector(int render_width)
+{
   Spot *spot = (Spot *)selection.ptr;
 
   // Convert spot->id (int) to string
@@ -172,18 +180,24 @@ void draw_spot_inspector(int render_width) {
   Rectangle id_rect = (Rectangle){render_width + half_width + 16,
                                   TAB_BAR_HEIGHT + 24 + 8 + 18, half_width, 32};
 
-  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+  {
     Vector2 mouse_pos = GetMousePosition();
     bool is_inside_zone = CheckCollisionPointRec(mouse_pos, zone_rect);
     bool is_inside_id = CheckCollisionPointRec(mouse_pos, id_rect);
 
-    if (is_inside_zone) {
+    if (is_inside_zone)
+    {
       zone_edit = true;
       id_edit = false;
-    } else if (is_inside_id) {
+    }
+    else if (is_inside_id)
+    {
       zone_edit = false;
       id_edit = true;
-    } else {
+    }
+    else
+    {
       zone_edit = false;
       id_edit = false;
     }
@@ -192,11 +206,13 @@ void draw_spot_inspector(int render_width) {
   GuiTextBox(zone_rect, zone_str, sizeof(zone_str), zone_edit);
   GuiTextBox(id_rect, id_str, sizeof(id_str), id_edit);
 
-  if (sscanf(zone_str, "%c", &new_zone) == 1) {
+  if (sscanf(zone_str, "%c", &new_zone) == 1)
+  {
     spot->zone = new_zone;
   }
 
-  if (sscanf(id_str, "%d", &new_id) == 1) {
+  if (sscanf(id_str, "%d", &new_id) == 1)
+  {
     spot->id = new_id;
   }
 
@@ -212,7 +228,8 @@ void draw_spot_inspector(int render_width) {
   spot->type = (SpotType)type_index;
 }
 
-void draw_inspector(int render_width) {
+void draw_inspector(int render_width)
+{
   GuiPanel((Rectangle){render_width, TAB_BAR_HEIGHT,
                        SCREEN_WIDTH - render_width,
                        SCREEN_HEIGHT - TAB_BAR_HEIGHT},
@@ -224,19 +241,22 @@ void draw_inspector(int render_width) {
   draw_spot_inspector(render_width);
 }
 
-void handle_inspect_tool(int tool_index, Rectangle render_rect) {
+void handle_inspect_tool(int tool_index, Rectangle render_rect)
+{
   if (tool_index != TOOL_INSPECT)
     return;
 
   // Dragging the camera
-  if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+  if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
+  {
     Vector2 delta = GetMouseDelta();
     camera.offset.x += delta.x;
     camera.offset.y += delta.y;
   }
 }
 
-Vector2 get_mouse_grid_pos(Rectangle render_rect) {
+Vector2 get_mouse_grid_pos(Rectangle render_rect)
+{
   Vector2 mouse_screen_pos = GetMousePosition();
   Vector2 mouse_render_pos = (Vector2){mouse_screen_pos.x - render_rect.x,
                                        mouse_screen_pos.y - render_rect.y};
@@ -248,7 +268,8 @@ Vector2 get_mouse_grid_pos(Rectangle render_rect) {
                    floor(mouse_world_pos.y / GRID_SIZE) * GRID_SIZE};
 }
 
-void handle_spot_tool(int tool_index, Rectangle render_rect) {
+void handle_spot_tool(int tool_index, Rectangle render_rect)
+{
   bool should_place =
       tool_index == TOOL_PARKING && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   if (!should_place)
@@ -260,10 +281,12 @@ void handle_spot_tool(int tool_index, Rectangle render_rect) {
   bool grid_pos_taken = is_at(grid_pos);
   bool is_spot = is_spot_at(grid_pos);
 
-  if (is_spot) {
+  if (is_spot)
+  {
     remove_spot(grid_pos);
     return;
-  } else if (grid_pos_taken)
+  }
+  else if (grid_pos_taken)
     return;
 
   if (is_outside_renderer)
@@ -273,7 +296,8 @@ void handle_spot_tool(int tool_index, Rectangle render_rect) {
   add_spot(grid_pos, 'A');
 }
 
-void handle_road_tool(int tool_index, Rectangle render_rect) {
+void handle_road_tool(int tool_index, Rectangle render_rect)
+{
   bool should_place =
       tool_index == TOOL_ROAD && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   if (!should_place)
@@ -287,17 +311,20 @@ void handle_road_tool(int tool_index, Rectangle render_rect) {
   bool grid_pos_taken = is_at(grid_pos);
   bool is_road = is_road_at(grid_pos);
 
-  if (is_road) {
+  if (is_road)
+  {
     remove_roads(grid_pos);
     return;
-  } else if (grid_pos_taken)
+  }
+  else if (grid_pos_taken)
     return;
 
   // Assign first zone by default
   add_road(grid_pos);
 }
 
-void handle_entrance_tool(int tool_index, Rectangle render_rect) {
+void handle_entrance_tool(int tool_index, Rectangle render_rect)
+{
   bool should_place =
       tool_index == TOOL_ENTRANCE && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
   if (!should_place)
@@ -311,10 +338,12 @@ void handle_entrance_tool(int tool_index, Rectangle render_rect) {
   bool grid_pos_taken = is_at(grid_pos);
   bool is_entrance = is_entrance_at(grid_pos);
 
-  if (is_entrance) {
+  if (is_entrance)
+  {
     remove_entrance(grid_pos);
     return;
-  } else if (grid_pos_taken)
+  }
+  else if (grid_pos_taken)
     return;
 
   // Assign first zone by default
@@ -322,8 +351,10 @@ void handle_entrance_tool(int tool_index, Rectangle render_rect) {
 }
 
 int deleting_floor_index = -1;
-void draw_floor_buttons() {
-  if (deleting_floor_index != -1) {
+void draw_floor_buttons()
+{
+  if (deleting_floor_index != -1)
+  {
     int message_result = GuiMessageBox(
         (Rectangle){(float)(SCREEN_WIDTH - INSPECTOR_WIDTH) / 2 - 125,
                     (float)(SCREEN_HEIGHT - TAB_BAR_HEIGHT - BUTTON_SIZE) / 2 +
@@ -333,7 +364,8 @@ void draw_floor_buttons() {
         TextFormat("Are you sure you want to delete floor %d?",
                    deleting_floor_index + 1),
         "Confirm;Cancel");
-    if (message_result != -1) {
+    if (message_result != -1)
+    {
       if (message_result == 1)
         remove_floor(deleting_floor_index);
 
@@ -349,7 +381,8 @@ void draw_floor_buttons() {
   //     ((SCREEN_HEIGHT - TAB_BAR_HEIGHT) - total_width) / 2 + TAB_BAR_HEIGHT;
 
   // Draw floor buttons
-  for (int i = 0; i < project->floor_count; i++) {
+  for (int i = 0; i < project->floor_count; i++)
+  {
     int x = (BUTTON_SIZE + BUTTON_SPACING) * i;
     Rectangle btn_rect =
         (Rectangle){x, SCREEN_HEIGHT - BUTTON_SIZE, BUTTON_SIZE, BUTTON_SIZE};
@@ -358,7 +391,8 @@ void draw_floor_buttons() {
         IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) &&
         CheckCollisionPointRec(GetMousePosition(), btn_rect);
 
-    if (was_right_clicked && project->floor_count > 1) {
+    if (was_right_clicked && project->floor_count > 1)
+    {
       deleting_floor_index = i;
       break;
     }
@@ -380,7 +414,8 @@ void draw_floor_buttons() {
     add_floor();
 }
 
-void handle_save() {
+void handle_save()
+{
   if (!IsKeyDown(KEY_LEFT_CONTROL))
     return;
   if (!IsKeyPressed(KEY_S))
@@ -389,7 +424,8 @@ void handle_save() {
   save_project();
 }
 
-void draw_selection_preview(Rectangle render_rect) {
+void draw_selection_preview(Rectangle render_rect)
+{
   Vector2 mouse = GetMousePosition();
   Rectangle renderArea = {render_rect.x, render_rect.y, render_rect.width,
                           render_rect.height};
@@ -408,6 +444,7 @@ void draw_selection_preview(Rectangle render_rect) {
                      ColorAlpha(WHITE, 1.0f));
 }
 
-bool vector2_equal(Vector2 v1, Vector2 v2) {
+bool vector2_equal(Vector2 v1, Vector2 v2)
+{
   return v1.x == v2.x && v1.y == v2.y;
 }

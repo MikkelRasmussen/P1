@@ -7,12 +7,10 @@
 #include "selection.h"
 #include <math.h>
 
-Selection selection = (Selection){
-    NONE  /*SPOT*/,
-    {0, 0},
-    NULL  /*&(Spot){.id = 0, .position = {0, 0}, .type = Default, .zone = 'A'}*/};
+Selection selection = {0};
 
-void update_selection(Rectangle render_rect) {
+void update_selection(Rectangle render_rect)
+{
   if (project == NULL)
     return;
 
@@ -32,19 +30,22 @@ void update_selection(Rectangle render_rect) {
 
   selection.position = grid_pos;
 
-  if (spot != NULL) {
+  if (spot != NULL)
+  {
     selection.type = SPOT;
     selection.ptr = spot;
     return;
   }
 
-  if (road != NULL) {
+  if (road != NULL)
+  {
     selection.type = ROAD;
     selection.ptr = road;
     return;
   }
 
-  if (entrance != NULL) {
+  if (entrance != NULL)
+  {
     selection.type = ENTRANCE;
     selection.ptr = entrance;
     return;
@@ -54,7 +55,8 @@ void update_selection(Rectangle render_rect) {
   selection.ptr = NULL;
 }
 
-void draw_selection(Rectangle render_rect) {
+void draw_selection(Rectangle render_rect)
+{
   if (selection.type == NONE)
     return;
 

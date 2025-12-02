@@ -3,21 +3,29 @@
 #include <raylib.h>
 #include <stdbool.h>
 
-typedef enum SpotType { Default, Handicap, EV, Motorcycle } SpotType;
+typedef enum SpotType
+{
+  Default,
+  Handicap,
+  EV
+} SpotType;
 
-typedef struct Spot {
+typedef struct Spot
+{
   Vector2 position;
   int id;
   char zone;
   SpotType type;
 } Spot;
 
-typedef struct Road {
+typedef struct Road
+{
   Vector2 position;
   int distance;
 } Road;
 
-typedef struct Floor {
+typedef struct Floor
+{
   Spot *spots;
   int spot_count;
   Road *roads;
@@ -27,7 +35,8 @@ typedef struct Floor {
 } Floor;
 
 // Now define the full struct
-typedef struct Project {
+typedef struct Project
+{
   nfdu8char_t *path;
   int floor_count;
   Floor *floors;
@@ -57,6 +66,8 @@ int get_spot_index(Vector2 position);
 void add_spot(Vector2 position, char zone);
 void remove_spot(Vector2 position);
 void draw_spots();
+void change_spot_type_color(Spot *spot, SpotType newType);
+Color get_spot_color(SpotType type);
 
 // Roads
 Road *get_road_at(Vector2 position);
