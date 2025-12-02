@@ -39,3 +39,4 @@ void handle_road_tool(int tool_index, Rectangle render_rect);
 void handle_entrance_tool(int tool_index, Rectangle render_rect);
 void handle_save();
 bool vector2_equal(Vector2 v1, Vector2 v2);
+void update_tool_selection(int *tool_index);

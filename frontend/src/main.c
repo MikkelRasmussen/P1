@@ -45,7 +45,8 @@ int main(void) {
                               &render_height);
     update_camera(render_rect);
 
-    update_selection(render_rect);
+    update_selection(render_rect, tool_index);
+    update_tool_selection(&tool_index);
 
     // Handle inspect tool (drag camera)
     handle_inspect_tool(tool_index, render_rect);
