@@ -702,13 +702,13 @@ Color get_spot_color(SpotType type)
   switch (type)
   {
   case Default:
-    return BLUE;
+    return DARKGRAY;
   case Handicap:
-    return YELLOW;
-  case EV:
-    return GREEN;
-  default:
     return BLUE;
+  case EV:
+    return DARKGREEN;
+  default:
+    return ORANGE;
   }
 }
 
@@ -924,7 +924,7 @@ void draw_roads()
   for (int i = 0; i < *road_count; i++)
   {
     Road *road = &(*roads)[i];
-    DrawRectangleV(road->position, (Vector2){50, 50}, BLACK);
+    DrawRectangleV(road->position, (Vector2){50, 50}, GRAY);
     draw_centered_text(TextFormat("%d", road->distance), road->position.x + 25,
                        road->position.y + 25, 12);
   }
