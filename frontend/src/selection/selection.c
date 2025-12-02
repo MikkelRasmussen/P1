@@ -24,7 +24,7 @@ void update_selection(Rectangle render_rect, int tool_index) {
   if (is_outside_renderer)
     return;
 
-  Vector2 grid_pos = get_mouse_grid_pos(render_rect);
+  Vector2 grid_pos = get_grid_pos_mouse(render_rect);
 
   Spot *spot = get_spot_at(grid_pos);
   Road *road = get_road_at(grid_pos);
