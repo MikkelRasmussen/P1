@@ -2,9 +2,7 @@
 // Created by mikke on 18/11/2025.
 //
 
-<<<<<<< Updated upstream
-#include "assignLot.h"
-=======
+
 #include "assignLot.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -230,4 +228,3 @@ void autoAssignNewCar(struct car *newCar,
            parkinglots[freeIndex].number,
            freeIndex);
 }
->>>>>>> Stashed changes

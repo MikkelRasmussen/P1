@@ -15,6 +15,12 @@ struct parking_lot {
     enum type type;
     enum status status;
 };
+struct car {
+    char number_plate[16];
+    enum type type;
+    int assigned_lot;
+};
+
 
 int lengthOfDataFile();
 int scanDataFile(int id, int *floor, char *zone, int *number, enum type *type);

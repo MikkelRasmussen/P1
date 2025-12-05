@@ -17,8 +17,6 @@
         //Indlæser alt dataen fra filen ind i listen af parkeringspladser.
         createParkingLot(fileLength, parkinglots);
 
-<<<<<<< Updated upstream
-=======
         int carCount = 4;
         struct car *cars = malloc(carCount * sizeof(struct car));
         cars[0] = (struct car){"LMN456", HANDICAPPED, -1};
@@ -28,7 +26,7 @@
 
         parkingMenu(parkinglots, fileLength-1, cars, carCount);
         free(cars);
->>>>>>> Stashed changes
+
         return 0;
     }
 
