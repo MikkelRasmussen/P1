@@ -5,20 +5,21 @@
 #ifndef BACKEND_PARKINGLOT_H
 #define BACKEND_PARKINGLOT_H
 
-enum type {HANDICAPPED, EV, STANDARD};
+enum type {STANDARD, HANDICAPPED, EV};
 enum status {VACANT, OCCUPIED, ERROR};
 
 struct parking_lot {
     int floor;
-    char area[64];
+    char zone[2];
     int number;
     enum type type;
     enum status status;
 };
 
 int lengthOfDataFile();
-int scanDataFile(int id, int *floor, char *area, int *number);
+int scanDataFile(int id, int *floor, char *zone, int *number, enum type *type);
 void createParkingLot(int size, struct parking_lot parkinglots[]);
+int getAssignedLotOfCar(struct parking_lot lots[], int lotCount, struct car cars[], int carCount);
 
 const char* statusToString(enum status s);
 const char* typeToString(enum type t);
