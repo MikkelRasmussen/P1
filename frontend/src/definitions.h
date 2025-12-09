@@ -1,0 +1,18 @@
+#define SCREEN_WIDTH GetScreenWidth()
+#define SCREEN_HEIGHT GetScreenHeight()
+#define TAB_BAR_HEIGHT 56
+#define BUTTON_SPACING 2
+#define BUTTON_SIZE (TAB_BAR_HEIGHT - 2 * TAB_BAR_PADDING)
+#define TAB_BAR_PADDING 12
+#define INSPECTOR_WIDTH 320
+#define DEFAULT_SCREEN_WIDTH 1280
+#define DEFAULT_SCREEN_HEIGHT 720
+#define NEW_ICON "#8#"
+#define OPEN_ICON "#1#"
+#define SAVE_ICON "#2#"
+#define EXPORT_ICON "#7#"
+#define INSPECT_ICON "#21#"
+#define PARKING_ICON "#220#"
+#define ROAD_ICON "#221#"
+#define ENTRANCE_ICON "#222#"
+#define GRID_SIZE 50 // each grid square is 50x50 pixels
