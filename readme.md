@@ -61,7 +61,7 @@
         <li><a href="#running">Running the parking manager</a></li>
       </ul>
     </li>
-    <li><a href="#contributors">Contributing</a></li>
+    <li><a href="#contributors">Contributors</a></li>
   </ol>
 </details>
 
