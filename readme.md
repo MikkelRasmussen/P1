@@ -57,7 +57,8 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
+        <li><a href="#prerequisites">Generating parking structure</a></li>
+        <li><a href="#running">Running the parking manager</a></li>
       </ul>
     </li>
 
@@ -70,10 +71,13 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+The goal of this project was optimizing parking times for drivers, looking to park in an parking structure that is almost at full capacity
+</br>
+</br>
+The project is split in two programs:
+1. A interface to create prioritized parking structures
+2. A parking manager that can assign cars parking lots based on priority and different variables. 
+</br>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -95,13 +99,38 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 <!-- GETTING STARTED -->
 ## Getting Started
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+Start by cloning the repository
+
+   ```sh
+   git clone https://github.com/MikkelRasmussen/P1.git
+   ```
+
 
 ### Prerequisites
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+For the parking manager to run as a simulation.</br> In the file main.c change
+```C
+//simulateAssignmentTime(cars, carCount, parkinglots, fileLength - 1);
+parkingMenu(parkinglots, fileLength - 1, cars, carCount);
+```
+to
+```C
+simulateAssignmentTime(cars, carCount, parkinglots, fileLength - 1);
+//parkingMenu(parkinglots, fileLength - 1, cars, carCount);
+```
+And in the file parkingLotData.c its important to comment out line 63 and 72
+```C
+Line 63 //char *occupancyStr = strtok(NULL, ",");
+Line 72 //*status = atoi(occupancyStr);
+```
 
-### Generating parking structere
+And make sure that the files containing information regarding cars, are corresponding correctly in main.c and getparkingData.c with your saved file.
+```C
+FILE *file = fopen("--> export.pexport <--", "r");
+struct car *cars = loadCarsFromCSV("--> simulation1.csv <--", &carCount);
+```
+
+### Generating parking structure
 
 1. How to use the parking structure design and optimization:
 First start by making a new project by clicking the leftest most button in the top bar.
@@ -121,11 +150,11 @@ Choose what command you want to execute.
     6. Exit
     Enter choice:
    ```
-1. Gives you the option to assign an imported car to the parking structere.
+1. Gives you the option to assign an imported car to the parking structure.
    ```C
    1. Assign a car to a lot
    ```
-2. Gives you the option to remove an car from the parking structere, and freeing the lot for a new car.
+2. Gives you the option to remove an car from the parking structure, and freeing the lot for a new car.
    ```C
    2. Deassign a car from a lot
    ```
