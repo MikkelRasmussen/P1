@@ -198,7 +198,7 @@ Project Link: [https://github.com/MikkelRasmussen/P1](https://github.com/MikkelR
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [github-shield]: https://img.shields.io/badge/github-repo-blue?logo=github
-[github-url]: https://github.com/MikkelRasmussen/pp1
+[github-url]: https://github.com/MikkelRasmussen/p1
 
 [product-screenshot]: images/screenshot.png
 <!-- Shields.io badges. You can a comprehensive list with many more badges at: https://github.com/inttter/md-badges -->
