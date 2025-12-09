@@ -59,76 +59,52 @@ void draw_tab_bar() {
   DrawRectangle(0, 0, SCREEN_WIDTH, TAB_BAR_HEIGHT, get_bg_color());
   GuiLine((Rectangle){0, TAB_BAR_HEIGHT, SCREEN_WIDTH, 1}, NULL);
 
+  const char *tooltips[] = {"New Project", "Open Project", "Save Project",
+                            "Export Project"};
+  const char *icons[] = {NEW_ICON, OPEN_ICON, SAVE_ICON, EXPORT_ICON};
+  bool pressed[4] = {false};
+
   GuiEnableTooltip();
-  // New
-  GuiSetTooltip("New Project");
-  bool is_new_pressed = GuiButton(
-      (Rectangle){.x = TAB_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 0,
-                  .y = TAB_BAR_PADDING,
-                  .width = BUTTON_SIZE,
-                  .height = BUTTON_SIZE},
-      NEW_ICON);
-  // Open
-  GuiSetTooltip("Open Project");
-  bool is_open_pressed = GuiButton(
-      (Rectangle){.x = TAB_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 1,
-                  .y = TAB_BAR_PADDING,
-                  .width = BUTTON_SIZE,
-                  .height = BUTTON_SIZE},
-      OPEN_ICON);
-  // Save
-  GuiSetTooltip("Save Project");
-  bool is_save_pressed = GuiButton(
-      (Rectangle){.x = TAB_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 2,
-                  .y = TAB_BAR_PADDING,
-                  .width = BUTTON_SIZE,
-                  .height = BUTTON_SIZE},
-      SAVE_ICON);
-  // Export
-  GuiSetTooltip("Export Project");
-  bool is_export_pressed = GuiButton(
-      (Rectangle){.x = TAB_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 3,
-                  .y = TAB_BAR_PADDING,
-                  .width = BUTTON_SIZE,
-                  .height = BUTTON_SIZE},
-      EXPORT_ICON);
+  for (int i = 0; i < 4; i++) {
+    GuiSetTooltip(tooltips[i]);
+    pressed[i] = GuiButton(
+        (Rectangle){.x = TAB_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * i,
+                    .y = TAB_BAR_PADDING,
+                    .width = BUTTON_SIZE,
+                    .height = BUTTON_SIZE},
+        icons[i]);
+  }
   GuiDisableTooltip();
 
-  if (project != NULL) {
-    char *path_copy = strdup(project->path);
-    if (path_copy == NULL)
-      return;
-
-    const char *project_name = path_copy;
-    const char *last_slash = strrchr(path_copy, '\\');
-    char *last_dot = strrchr(path_copy, '.');
-
-    if (last_slash != NULL)
-      project_name = last_slash + 1;
-
-    if (last_dot != NULL)
-      *last_dot = '\0';
-
-    const int font_size = 18;
-    DrawText(
-        project_name,
-        TAB_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 4 + BUTTON_SIZE / 2,
-        TAB_BAR_PADDING + BUTTON_SIZE / 2 - font_size / 2, font_size, WHITE);
-
-    free(path_copy);
-  }
-
-  if (is_new_pressed)
+  if (pressed[0])
     new_project();
-
-  if (is_open_pressed)
+  if (pressed[1])
     open_project();
-
-  if (is_save_pressed)
+  if (pressed[2])
     save_project();
-
-  if (is_export_pressed)
+  if (pressed[3])
     export_project();
+
+  if (!project)
+    return;
+
+  char *path_copy = strdup(project->path);
+  if (!path_copy)
+    return;
+
+  const char *project_name = path_copy;
+  char *last_slash = strrchr(path_copy, '\\');
+  char *last_dot = strrchr(path_copy, '.');
+  if (last_slash)
+    project_name = last_slash + 1;
+  if (last_dot)
+    *last_dot = '\0';
+  const int font_size = 18;
+  DrawText(project_name,
+           TAB_BAR_PADDING + (BUTTON_SIZE + BUTTON_SPACING) * 4 +
+               BUTTON_SIZE / 2,
+           TAB_BAR_PADDING + BUTTON_SIZE / 2 - font_size / 2, font_size, WHITE);
+  free(path_copy);
 }
 
 void draw_tool_bar(int *tool_index, int render_width) {
@@ -228,6 +204,10 @@ void handle_inspect_tool(int tool_index, Rectangle render_rect) {
   if (tool_index != TOOL_INSPECT)
     return;
 
+  bool is_outside_renderer = get_is_outside_renderer(render_rect);
+  if (is_outside_renderer)
+    return;
+
   // Dragging the camera
   if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
     Vector2 delta = GetMouseDelta();
@@ -236,16 +216,22 @@ void handle_inspect_tool(int tool_index, Rectangle render_rect) {
   }
 }
 
-Vector2 get_mouse_grid_pos(Rectangle render_rect) {
+Vector2 get_grid_pos(Vector2 world_pos) {
+  return (Vector2){floor(world_pos.x / GRID_SIZE) * GRID_SIZE,
+                   floor(world_pos.y / GRID_SIZE) * GRID_SIZE};
+}
+
+Vector2 get_grid_pos_screen(Vector2 screen_pos, Rectangle render_rect) {
+  Vector2 render_pos =
+      (Vector2){screen_pos.x - render_rect.x, screen_pos.y - render_rect.y};
+  Vector2 world_pos = GetScreenToWorld2D(render_pos, camera);
+
+  return get_grid_pos(world_pos);
+}
+
+Vector2 get_grid_pos_mouse(Rectangle render_rect) {
   Vector2 mouse_screen_pos = GetMousePosition();
-  Vector2 mouse_render_pos = (Vector2){mouse_screen_pos.x - render_rect.x,
-                                       mouse_screen_pos.y - render_rect.y};
-
-  Vector2 mouse_world_pos = GetScreenToWorld2D(mouse_render_pos, camera);
-
-  // Snap to grid
-  return (Vector2){floor(mouse_world_pos.x / GRID_SIZE) * GRID_SIZE,
-                   floor(mouse_world_pos.y / GRID_SIZE) * GRID_SIZE};
+  return get_grid_pos_screen(mouse_screen_pos, render_rect);
 }
 
 void handle_spot_tool(int tool_index, Rectangle render_rect) {
@@ -256,7 +242,7 @@ void handle_spot_tool(int tool_index, Rectangle render_rect) {
 
   bool is_outside_renderer = get_is_outside_renderer(render_rect);
 
-  Vector2 grid_pos = get_mouse_grid_pos(render_rect);
+  Vector2 grid_pos = get_grid_pos_mouse(render_rect);
   bool grid_pos_taken = is_at(grid_pos);
   bool is_spot = is_spot_at(grid_pos);
 
@@ -283,7 +269,7 @@ void handle_road_tool(int tool_index, Rectangle render_rect) {
   if (is_outside_renderer)
     return;
 
-  Vector2 grid_pos = get_mouse_grid_pos(render_rect);
+  Vector2 grid_pos = get_grid_pos_mouse(render_rect);
   bool grid_pos_taken = is_at(grid_pos);
   bool is_road = is_road_at(grid_pos);
 
@@ -307,7 +293,7 @@ void handle_entrance_tool(int tool_index, Rectangle render_rect) {
   if (is_outside_renderer)
     return;
 
-  Vector2 grid_pos = get_mouse_grid_pos(render_rect);
+  Vector2 grid_pos = get_grid_pos_mouse(render_rect);
   bool grid_pos_taken = is_at(grid_pos);
   bool is_entrance = is_entrance_at(grid_pos);
 
@@ -397,17 +383,30 @@ void draw_selection_preview(Rectangle render_rect) {
   if (!CheckCollisionPointRec(mouse, renderArea))
     return;
 
-  Vector2 local = {mouse.x - render_rect.x, mouse.y - render_rect.y};
+  Vector2 grid_pos = get_grid_pos_screen(mouse, render_rect);
 
-  Vector2 world = GetScreenToWorld2D(local, camera);
-
-  Vector2 snapped = {floorf(world.x / GRID_SIZE) * GRID_SIZE,
-                     floorf(world.y / GRID_SIZE) * GRID_SIZE};
-
-  DrawRectangleLines(snapped.x, snapped.y, GRID_SIZE, GRID_SIZE * 1.0f,
+  DrawRectangleLines(grid_pos.x, grid_pos.y, GRID_SIZE, GRID_SIZE,
                      ColorAlpha(WHITE, 1.0f));
 }
 
 bool vector2_equal(Vector2 v1, Vector2 v2) {
   return v1.x == v2.x && v1.y == v2.y;
+}
+
+void update_tool_selection(int *tool_index) {
+  int key = GetKeyPressed();
+  switch (key) {
+  case KEY_ONE:
+    *tool_index = TOOL_INSPECT;
+    break;
+  case KEY_TWO:
+    *tool_index = TOOL_PARKING;
+    break;
+  case KEY_THREE:
+    *tool_index = TOOL_ROAD;
+    break;
+  case KEY_FOUR:
+    *tool_index = TOOL_ENTRANCE;
+    break;
+  }
 }

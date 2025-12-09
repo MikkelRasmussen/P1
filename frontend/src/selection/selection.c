@@ -7,12 +7,12 @@
 #include "selection.h"
 #include <math.h>
 
-Selection selection = (Selection){
-    NONE  /*SPOT*/,
-    {0, 0},
-    NULL  /*&(Spot){.id = 0, .position = {0, 0}, .type = Default, .zone = 'A'}*/};
+Selection selection = {0};
 
-void update_selection(Rectangle render_rect) {
+void update_selection(Rectangle render_rect, int tool_index) {
+  if (tool_index != TOOL_INSPECT)
+    return;
+
   if (project == NULL)
     return;
 
@@ -24,7 +24,7 @@ void update_selection(Rectangle render_rect) {
   if (is_outside_renderer)
     return;
 
-  Vector2 grid_pos = get_mouse_grid_pos(render_rect);
+  Vector2 grid_pos = get_grid_pos_mouse(render_rect);
 
   Spot *spot = get_spot_at(grid_pos);
   Road *road = get_road_at(grid_pos);

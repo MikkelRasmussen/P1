@@ -626,11 +626,32 @@ void draw_spots() {
 
   for (int i = 0; i < *spot_count; i++) {
     Spot *spot = &(*active_floor)[i];
-    DrawRectangleV(spot->position, (Vector2){50, 50}, BLUE);
+    Color color = get_spot_color(spot->type);
+    DrawRectangleV(spot->position, (Vector2){50, 50}, color);
     draw_centered_text(TextFormat("%c%d", spot->zone, spot->id),
                        spot->position.x + 25, spot->position.y + 25, 12);
   }
 }
+
+Color get_spot_color(SpotType type) {
+  switch (type) {
+  case Default:
+    return DARKGRAY;
+  case Handicap:
+    return BLUE;
+  case EV:
+    return DARKGREEN;
+  default:
+    return ORANGE;
+  }
+}
+
+void change_spot_type_color(Spot *spot, SpotType newType) {
+  if (spot == NULL)
+    return;
+  spot->type = newType;
+}
+
 #pragma endregion
 
 #pragma region Roads
@@ -820,7 +841,7 @@ void draw_roads() {
 
   for (int i = 0; i < *road_count; i++) {
     Road *road = &(*roads)[i];
-    DrawRectangleV(road->position, (Vector2){50, 50}, BLACK);
+    DrawRectangleV(road->position, (Vector2){50, 50}, GRAY);
     draw_centered_text(TextFormat("%d", road->distance), road->position.x + 25,
                        road->position.y + 25, 12);
   }

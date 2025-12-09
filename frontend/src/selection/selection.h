@@ -11,5 +11,5 @@ typedef struct Selection {
 
 extern Selection selection;
 
-void update_selection(Rectangle render_rect);
+void update_selection(Rectangle render_rect, int tool_index);
 void draw_selection(Rectangle render_rect);
