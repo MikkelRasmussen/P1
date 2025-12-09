@@ -211,8 +211,8 @@ bool get_open_file_path(nfdu8char_t **path) {
 
 bool get_export_file_path(nfdu8char_t **path) {
   nfdu8filteritem_t filters[1] = {{"Export Files", "pexport"}};
-  nfdopendialogu8args_t args = {.filterList = filters, .filterCount = 1};
-  nfdresult_t result = NFD_OpenDialogU8_With(path, &args);
+  nfdsavedialogu8args_t args = {.filterList = filters, .filterCount = 1};
+  nfdresult_t result = NFD_SaveDialogU8_With(path, &args);
 
   switch (result) {
   case NFD_OKAY:
