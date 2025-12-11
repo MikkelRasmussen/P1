@@ -121,6 +121,11 @@ And in the file parkingLotData.c its important to comment out line 63 and 72
 Line 63 //char *occupancyStr = strtok(NULL, ",");
 Line 72 //*status = atoi(occupancyStr);
 ```
+And in the file parkingLot comment out
+```C
+// parkinglots[i].status = VACANT; // Initially vacant - COMMENTED OUT WHEN SIMULATING
+```
+
 
 And make sure that the files containing information regarding cars, are corresponding correctly in main.c and getparkingData.c with your saved file.
 ```C
@@ -186,7 +191,7 @@ Choose what command you want to execute.
 [Github](https://github.com/NoahHorslev) - Noah Horselv Petersen</br>
 [Github](https://github.com/LyraWT) - Lyra Winther Tybo</br>
 [Github](https://github.com/Buggsiii) - Frederik Bugge Jørgensen</br>
-[Github](https://github.com/MikkelRasmussen7) - Mikkel Buus Rasmussen</br>
+[Github](https://github.com/MikkelRasmussen) - Mikkel Buus Rasmussen</br>
 
 
 Project Link: [https://github.com/MikkelRasmussen/P1](https://github.com/MikkelRasmussen/P1)

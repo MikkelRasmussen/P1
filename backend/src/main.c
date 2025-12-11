@@ -1,32 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "parkingLot.h"
+
 #include "assignLot.h"
+#include "parkingLot.h"
 
+int main()
+{
 
-    int main() {
+    // Get length of data file containing parking structere info
+    int fileLength = lengthOfDataFile();
+    printf("File Length: %d\n", fileLength);
 
-        //Få længden af filen over parkeringspladser
-        int fileLength = lengthOfDataFile();
-        printf("File Length: %d\n", fileLength);
+    //  Create array to hold parking lots
+    struct parking_lot parkinglots[fileLength - 1];
 
-        //Opret en liste af parkeringspladser
-        struct parking_lot parkinglots[fileLength-1];
+    // Call function to create parking lots
+    createParkingLot(fileLength - 1, parkinglots);
 
-        //Indlæser alt dataen fra filen ind i listen af parkeringspladser.
-        createParkingLot(fileLength, parkinglots);
-
-        int carCount = 4;
-        struct car *cars = malloc(carCount * sizeof(struct car));
-        cars[0] = (struct car){"LMN456", HANDICAPPED, -1};
-        cars[1] = (struct car){"QWE111", STANDARD, -1};
-        cars[2] = (struct car){"RTY222", EV, -1};
-        cars[3] = (struct car){"UIO333", HANDICAPPED, -1};
-
-        parkingMenu(parkinglots, fileLength-1, cars, carCount);
-        free(cars);
-
-        return 0;
+    int carCount = 0;
+    // Load cars from CSV file
+    struct car *cars = loadCarsFromCSV("simulation1.csv", &carCount);
+    if (!cars || carCount == 0)
+    {
+        printf("No cars to simulate.\n");
+        return 1;
     }
 
+    // Simulate assignment time for loaded cars (Uncomment to run simulation)
+    // simulateAssignmentTime(cars, carCount, parkinglots, fileLength - 1);
+
+    // Running the program with the parking menu
+    parkingMenu(parkinglots, fileLength - 1, cars, carCount);
+    free(cars);
+
+    return 0;
+}
