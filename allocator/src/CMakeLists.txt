@@ -2,17 +2,12 @@ add_library(parkingLot parkingLot.c
         parkingLotData.c)
 target_include_directories(parkingLot PUBLIC .)
 
-add_executable(backend main.c
+add_executable(allocator main.c
         parkingLotData.c
         assignLot.c
         assignLot.h
 )
-add_executable(testing parkingLotData.c
-        assignLot.c
-        assignLot.h
-)
 
-include(../mtest/mtest.cmake)
-target_link_libraries(backend m parkingLot)
+target_link_libraries(allocator m parkingLot)
 
 
