@@ -7,6 +7,12 @@ add_executable(backend main.c
         assignLot.c
         assignLot.h
 )
+add_executable(testing parkingLotData.c
+        assignLot.c
+        assignLot.h
+)
+
+include(../mtest/mtest.cmake)
 target_link_libraries(backend m parkingLot)
 
 
