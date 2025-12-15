@@ -34,7 +34,7 @@
     
   </p>
   <a href="https://github.com/github_username/repo_name">
-    <img src="banner.png" alt="Logo"  >
+    <img src="banner.png" alt="Logo" style="height: 50%">
   </a> 
 
 
