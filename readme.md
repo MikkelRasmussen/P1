@@ -34,7 +34,7 @@
     
   </p>
   <a href="https://github.com/github_username/repo_name">
-    <img src="https://media.discordapp.net/attachments/1438111736149442615/1447889097895972926/image.png?ex=6939434d&is=6937f1cd&hm=e6d5b1d5b8200f373958a206c382efdab8fee4c87b26b0cc792ee2435a40bcba&=&format=webp&quality=lossless&width=1451&height=816" alt="Logo"  >
+    <img src="banner.png" alt="Logo"  >
   </a> 
 
 
