@@ -1,13 +1,11 @@
-add_library(parkingLot parkingLot.c
-        parkingLotData.c)
-target_include_directories(parkingLot PUBLIC .)
-
-add_executable(allocator main.c
+add_library(parkingLot
+        parkingLot.c
         parkingLotData.c
         assignLot.c
-        assignLot.h
 )
+target_include_directories(parkingLot PUBLIC .)
 
-target_link_libraries(allocator m parkingLot)
+add_executable(allocator main.c)
+target_link_libraries(allocator parkingLot m)
 
 
