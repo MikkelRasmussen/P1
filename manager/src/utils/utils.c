@@ -122,9 +122,9 @@ void draw_tool_bar(int *tool_index, int render_width) {
                  tool_index);
 }
 
-static bool zone_edit = false;
-static bool id_edit = false;
 void draw_spot_inspector(int render_width) {
+  static bool zone_edit = false;
+  static bool id_edit = false;
   Spot *spot = (Spot *)selection.ptr;
 
   // Convert spot->id (int) to string
@@ -307,10 +307,12 @@ void handle_entrance_tool(int tool_index, Rectangle render_rect) {
   add_entrance(grid_pos);
 }
 
-int deleting_floor_index = -1;
 void draw_floor_buttons() {
+  static int deleting_floor_index = -1;
+
+  // Handle delete confirmation
   if (deleting_floor_index != -1) {
-    int message_result = GuiMessageBox(
+    int result = GuiMessageBox(
         (Rectangle){(float)(SCREEN_WIDTH - INSPECTOR_WIDTH) / 2 - 125,
                     (float)(SCREEN_HEIGHT - TAB_BAR_HEIGHT - BUTTON_SIZE) / 2 +
                         TAB_BAR_HEIGHT - 50,
@@ -319,50 +321,35 @@ void draw_floor_buttons() {
         TextFormat("Are you sure you want to delete floor %d?",
                    deleting_floor_index + 1),
         "Confirm;Cancel");
-    if (message_result != -1) {
-      if (message_result == 1)
+    if (result != -1) {
+      if (result == 1)
         remove_floor(deleting_floor_index);
-
       deleting_floor_index = -1;
     }
   }
 
-  // Calculate the button container total height and the y-coord of the
-  // container
-  int total_width = (project->floor_count + 1) * BUTTON_SIZE +
-                    BUTTON_SPACING * project->floor_count;
-  // int base_y =
-  //     ((SCREEN_HEIGHT - TAB_BAR_HEIGHT) - total_width) / 2 + TAB_BAR_HEIGHT;
-
   // Draw floor buttons
   for (int i = 0; i < project->floor_count; i++) {
     int x = (BUTTON_SIZE + BUTTON_SPACING) * i;
-    Rectangle btn_rect =
-        (Rectangle){x, SCREEN_HEIGHT - BUTTON_SIZE, BUTTON_SIZE, BUTTON_SIZE};
-    int is_pressed = GuiButton(btn_rect, TextFormat("%d", i + 1));
-    int was_right_clicked =
-        IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) &&
-        CheckCollisionPointRec(GetMousePosition(), btn_rect);
+    Rectangle btn_rect = {x, SCREEN_HEIGHT - BUTTON_SIZE, BUTTON_SIZE,
+                          BUTTON_SIZE};
+    bool pressed = GuiButton(btn_rect, TextFormat("%d", i + 1));
+    bool right_clicked = IsMouseButtonPressed(MOUSE_BUTTON_RIGHT) &&
+                         CheckCollisionPointRec(GetMousePosition(), btn_rect);
 
-    if (was_right_clicked && project->floor_count > 1) {
+    if (right_clicked && project->floor_count > 1) {
       deleting_floor_index = i;
       break;
     }
-
-    if (!is_pressed)
-      continue;
-
-    project->active_floor = i;
+    if (pressed)
+      project->active_floor = i;
   }
 
-  // Draw add floor button
+  // Add floor button
   int x = (BUTTON_SIZE + BUTTON_SPACING) * project->floor_count;
-  int should_add_floor = GuiButton(
-      (Rectangle){x, SCREEN_HEIGHT - BUTTON_SIZE, BUTTON_SIZE, BUTTON_SIZE},
-      "+");
-
-  // Add floor, if button was pressed
-  if (should_add_floor)
+  if (GuiButton(
+          (Rectangle){x, SCREEN_HEIGHT - BUTTON_SIZE, BUTTON_SIZE, BUTTON_SIZE},
+          "+"))
     add_floor();
 }
 
