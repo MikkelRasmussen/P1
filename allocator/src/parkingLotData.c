@@ -11,7 +11,7 @@
 int lengthOfDataFile()
 {
     // Open the file containing parking structere data
-    FILE *file = fopen("simulation1.pexport", "r");
+    FILE *file = fopen("export.pexport", "r");
     // Print error message if file could not be opened
     if (file == NULL)
     {
@@ -40,7 +40,7 @@ int lengthOfDataFile()
 int scanDataFile(int id, int *floor, char *zone, int *number, enum type *type, enum status *status) // Status is commented out when not simulating
 {
     // Open the data file
-    FILE *file = fopen("simulation1.pexport", "r");
+    FILE *file = fopen("export.pexport", "r");
 
     // Print error message if file could not be opened
     if (file == NULL)

@@ -12,6 +12,7 @@ TEST_CASE(assignLot_test, {
   // Intializing the two structs for the parking lot and the car itself for the
   // test case
   for (int i = 0; i < 10; i++) {
+    lotArray[i].id = i;
     lotArray[i].floor = 1;
     strcpy(lotArray[i].zone, "A");
     lotArray[i].type = STANDARD;
@@ -26,9 +27,10 @@ TEST_CASE(assignLot_test, {
 
 TEST_CASE(deAssignSpace_test, {
   struct parking_lot lotArray[10];
-  struct car car = {"ABC123", STANDARD, -1};
+  struct car car = {"ABC123", STANDARD, 0};
 
   for (int i = 0; i < 10; i++) {
+    lotArray[i].id = i;
     lotArray[i].floor = 1;
     strcpy(lotArray[i].zone, "A");
     lotArray[i].type = STANDARD;
