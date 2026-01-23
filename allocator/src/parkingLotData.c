@@ -15,7 +15,7 @@ int lengthOfDataFile()
     // Print error message if file could not be opened
     if (file == NULL)
     {
-        printf("Could not open file data.csv");
+        printf("Could not open file export.pexport\n");
         return 1;
     }
     int current_line = 1;
@@ -45,7 +45,7 @@ int scanDataFile(int id, int *floor, char *zone, int *number, enum type *type, e
     // Print error message if file could not be opened
     if (file == NULL)
     {
-        printf("Could not open xporte.pexport\n");
+        printf("Could not open export.pexport\n");
         return 1;
     }
     char line[MAX_LINE];
